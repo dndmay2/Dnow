@@ -1,0 +1,27 @@
+    .header {
+        position:absolute;
+        left:0; right:0;
+        height: 150px;
+    }
+    .sidebar {
+        position:absolute;
+        left:0; top:150px; bottom: 0;
+        width: 178px;
+        background: LightGray;
+    }
+    .content {
+        position: absolute;
+        left:178px; top:150px; right:0; bottom:0;
+        border: 10px solid White;
+    }
+    input[type=submit] {
+        width: 180px;  height: 40px;
+        border: none;
+        font-size: 14px;
+    }
+    table, th, td {
+        border: 1px solid black;
+    }
+    th, td {
+        padding: 5px;
+    }

@@ -1,0 +1,13 @@
+{% extends "dnow/base.html" %}
+
+{% block title %}DNOW Parent Admin Page{% endblock %}
+
+{% block content %}
+    <h2>{{ parent.firstName }} {{ parent.lastName }} </h2>
+    <p> {{ parent.street }}<br>
+        {{ parent.city }}, {{ parent.state }} {{ parent.zipCode }}
+    </p>
+    <p><b>Phone:</b> {{ parent.phone }}</p>
+    <p><b>Email:</b> <a href="mailto:{{ parent.email }}">{{ parent.email }}</a></p>
+
+{% endblock %}

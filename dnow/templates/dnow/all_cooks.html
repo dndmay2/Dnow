@@ -1,0 +1,16 @@
+{% extends "dnow/base.html" %}
+
+{% block title %}DNOW Cooks Page{% endblock %}
+
+{% block content %}
+<h1>Cooks</h1>
+{% if cooksList %}
+    <ul>
+    {% for cook in cooksList %}
+        <li><a href="{% url 'cook' cook.id %}">{{ cook.firstName }} {{cook.lastName}}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No cooks in db.</p>
+{% endif %}
+{% endblock %}

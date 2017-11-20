@@ -1,0 +1,50 @@
+{% extends "dnow/base.html" %}
+{% load static %}
+
+{% block addstyle %}<link rel="stylesheet" href="{% static 'dnow/css/mapstyle.css' %}" />{% endblock %}
+{% block title %}DNOW Host Homes Page{% endblock %}
+
+{% block content %}
+    <h2>{{ hosthome.firstName }} {{ hosthome.lastName }}</h2>
+    <p> {{ hosthome.street }}<br>
+        {{ hosthome.city }}, {{ hosthome.state }} {{ hosthome.zipCode }}
+    </p>
+    <p><b>Phone:</b> {{ hosthome.phone }}</p>
+    <p><b>Email:</b> <a href="mailto:{{ hosthome.email }}">{{ hosthome.email }}</a></p>
+    <p><b>Background Check?  </b>{{ hosthome.bgCheck|yesno:"yes,no" }}</p>
+    <p><b>Grade(s): </b> {{ hosthome.grade }}</p>
+    <p><b>Gender: </b> {{ hosthome.gender }}</p>
+{% endblock %}
+
+
+{% block map %}
+    <script>
+        function initMap() {
+          var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 17,
+            center: {lat: 33.1299, lng: -96.6335}
+          });
+          var geocoder = new google.maps.Geocoder();
+          geocodeAddress(geocoder, map);
+        }
+
+        function geocodeAddress(geocoder, resultsMap) {
+          var address = "{{ hosthome.street }} {{ hosthome.city }} {{ hosthome.state }}";
+          //var address = document.getElementById('address').value;
+          geocoder.geocode({'address': address}, function(results, status) {
+            if (status === 'OK') {
+              resultsMap.setCenter(results[0].geometry.location);
+              var marker = new google.maps.Marker({
+                map: resultsMap,
+                position: results[0].geometry.location
+              });
+            } else {
+              alert('Geocode was not successful for the following reason: ' + status);
+            }
+          });
+        }
+    </script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDhv0vbI8coAU9aN22zhRCO-uQyGXPQ0A0&callback=initMap">
+    </script>
+{% endblock %}

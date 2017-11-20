@@ -1,0 +1,17 @@
+{% extends "dnow/base.html" %}
+
+{% block title %}DNOW Drivers Page{% endblock %}
+
+{% block content %}
+<h1>Drivers</h1>
+{% if driversList %}
+    <p><b>Total Car Capacity:</b> {{ seatCount }}</p>
+    <ul>
+    {% for driver in driversList %}
+        <li><a href="{% url 'driver' driver.id %}">{{ driver.firstName }} {{driver.lastName}}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No drivers in db.</p>
+{% endif %}
+{% endblock %}

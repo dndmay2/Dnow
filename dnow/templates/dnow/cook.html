@@ -1,0 +1,16 @@
+{% extends "dnow/base.html" %}
+
+{% block title %}DNOW Cook Admin Page{% endblock %}
+
+{% block content %}
+    <h2>{{ cook.firstName }} {{ cook.lastName }} </h2>
+    <p> {{ cook.street }}<br>
+        {{ cook.city }}, {{ cook.state }} {{ cook.zipCode }}
+    </p>
+    <p><b>Phone:</b> {{ cook.phone }}</p>
+    <p><b>Email:</b> <a href="mailto:{{ cook.email }}">{{ cook.email }}</a></p>
+{#    <p><b>HostHome:</b>#}
+{#        <a href="{% url 'hosthome' cook.hostHome.id %}">{{ cook.hostHome.firstName }} {{cook.hostHome.lastName}}</a>#}
+{#    </p>#}
+
+{% endblock %}

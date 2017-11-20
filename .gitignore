@@ -1,0 +1,7 @@
+*.pyc
+*.DStore
+dnow/migrations/*
+*.DS_Store
+*.sqlite3
+.idea/*
+venv/*

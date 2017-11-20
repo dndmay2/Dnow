@@ -1,0 +1,41 @@
+{% extends "dnow/base.html" %}
+
+{% block title %}DNOW Student Admin Page{% endblock %}
+
+{% block content %}
+    <h2>{{ student.firstName }} {{ student.lastName }} </h2>
+    <p> {{ student.street }}<br>
+        {{ student.city }}, {{ student.state }} {{ student.zipCode }}
+    </p>
+    <p><b>Phone:</b> {{ student.phone }}</p>
+    <p><b>Grade:</b> {{ student.grade }}</p>
+    <p><b>Gender:</b> {{ student.gender }}</p>
+    <p><b>Friend:</b> {{ student.friendName }}</p>
+    <table>
+        <tr>
+            <td>  <b>Registration date:</b>   </td>
+            <td>  {{ student.dateRegistered }}</td>
+        </tr>
+        <tr>
+            <td>  <b>Amount Paid:</b>      </td>
+            <td>  ${{ student.amountPaid }}</td>
+        </tr>
+        <tr>
+            <td>  <b>Member of church:</b>  </td>
+            <td>  {{ student.churchMember }}</td>
+        </tr>
+        <tr>
+            <td>  <b>T Shirt Size:</b>    </td>
+            <td>  {{ student.tshirtSize }}</td>
+        </tr>
+        <tr>
+            <td>  <b>Medical Form:</b>     </td>
+            <td>  {{ student.medicalForm }}</td>
+        </tr>
+    </table>
+{#    <p><b>Email:</b> <a href="mailto:{{ student.email }}">{{ student.email }}</a></p>#}
+{#    <p><b>Parent:</b> <a href="{%  url 'parent' student.parent.id %}">#}
+{#        {{ student.parent.firstName }} {{ student.parent.lastName }}</a></p>#}
+    <a href="/dnow/student/{{ prev }}">&laquo; previous</a>
+    <a href="/dnow/student/{{ next }}">next &raquo;</a>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "dnow/base.html" %}
+
+{% block title %}DNOW Admin Home Page{% endblock %}
+
+{% block content %}
+<h1>Students</h1>
+{% if studentList %}
+    <ul>
+    {% for student in studentList %}
+        <li><a href="{% url 'student' student.id %}">{{ student.firstName }} {{student.lastName}}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No students in db.</p>
+{% endif %}
+<h1>Parents</h1>
+{% if parentList %}
+    <ul>
+    {% for parent in parentList %}
+        <li><a href="{% url 'parent' parent.id %}">{{ parent.firstName }} {{ parent.lastName }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No parents in db.</p>
+{% endif %}
+{% endblock %}

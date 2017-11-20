@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'dnow/css/style.css' %}" />
+    {% block addstyle %}{% endblock %}
+    <title>{% block title %}DNOW Administration{% endblock %}</title>
+</head>
+<body>
+    <div class="header">
+        <img src="{% static 'dnow/images/Dnow-header.jpg' %}" alt="dnow-header.png"/>
+    </div>
+    <div class="sidebar">
+        {% block sidebar %}
+        <ul>
+            <li><a href="/admin">Admin</a></li>
+            <li><a href="/dnow/">Home</a></li>
+            <li><a href="/dnow/all_hosthomes/">Host Homes</a></li>
+            <li><a href="/dnow/all_drivers/">Drivers</a></li>
+            <li><a href="/dnow/all_cooks/">Cooks</a></li>
+            <li><a href="/dnow/spreadsheet/">Read Spreadsheet</a></li>
+        </ul>
+        {% endblock %}
+    </div>
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <div class="map" id="map">
+        {% block map %}{% endblock %}
+    </div>
+
+</body>
+</html>
