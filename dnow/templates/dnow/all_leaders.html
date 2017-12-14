@@ -1,0 +1,32 @@
+{% extends "dnow/base.html" %}
+
+{% block title %}DNOW Leaders Page{% endblock %}
+
+{% block content %}
+<h1>Leaders</h1>
+{% if leadersList %}
+    <table summary="Leader Table">
+        <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Host Home</th>
+            <th>Background?</th>
+            <th>T-Shirt</th>
+        </tr>
+        {% for leader in leadersList %}
+            {% url 'hosthome' leader.hostHome.id as hh %}
+            <tr>
+                <td><a href="{% url 'leader' leader.id %}">{{ leader.firstName }} {{leader.lastName}}</a></td>
+                <td>{{ leader.phone }}</td>
+                <td><a href="mailto:{{ leader.email }}">{{ leader.email }}</a></td>
+                <td><a href="{{ hh }}">{{leader.hostHome.lastName}}</a></td>
+                <td>{{ leader.bgCheck|yesno:"yes,no" }}</td>
+                <td>{{ leader.tshirtSize }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No leaders in db.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "dnow/base.html" %}
+
+{% block title %}DNOW Leader Page{% endblock %}
+
+{% block content %}
+    <h2>{{ leader.firstName }} {{ leader.lastName }} </h2>
+    <p> {{ leader.street }}<br>
+        {{ leader.city }}, {{ leader.state }} {{ leader.zipCode }}
+    </p>
+    <p><b>Phone:</b> {{ leader.phone }}</p>
+    <p><b>Email:</b> <a href="mailto:{{ leader.email }}">{{ leader.email }}</a></p>
+{#    <p><b>HostHome:</b>#}
+{#        <a href="{% url 'hosthome' leader.hostHome.id %}">{{ leader.hostHome.firstName }} {{leader.hostHome.lastName}}</a>#}
+{#    </p>#}
+
+{% endblock %}

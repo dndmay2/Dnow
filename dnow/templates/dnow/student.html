@@ -11,6 +11,7 @@
     <p><b>Grade:</b> {{ student.grade }}</p>
     <p><b>Gender:</b> {{ student.gender }}</p>
     <p><b>Friend:</b> {{ student.friendName }}</p>
+    <p><b>Host Home: </b><a href="{% url 'hosthome' student.hostHome.id %}">{{ student.hostHome.firstName }} {{student.hostHome.lastName}}</a></p>
     <table>
         <tr>
             <td>  <b>Registration date:</b>   </td>

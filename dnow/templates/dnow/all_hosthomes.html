@@ -4,13 +4,5 @@
 
 {% block content %}
 <h1>Host Homes</h1>
-{% if hostHomesList %}
-    <ul>
-    {% for hh in hostHomesList %}
-        <li><a href="{% url 'hosthome' hh.id %}">{{ hh.firstName }} {{hh.lastName}}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No host homes in db.</p>
-{% endif %}
+    {{ hostHomeSummary|safe }}
 {% endblock %}

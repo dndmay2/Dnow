@@ -18,18 +18,18 @@ SHIRT_SIZES = (
     ('Med',     'M'),
     ('Large',   'L'),
     ('XL',      'XL'),
+    # ('X Large',      'XL'),
     ('XXL',     'XXL'),
     ('XXXL',    'XXXL'),
 )
 
 DRIVE_SLOTS = (
-    ('driveSlot1', 'Fri, 8:50-9:30 pm'),
-    ('driveSlot2', 'Sat, 9:50-10:30 am'),
-    ('driveSlot3', 'Sat, 11:50 am-12:20 pm'),
-    ('driveSlot4', 'Sat, 1:00-4:00 pm'),
-    ('driveSlot5', 'Sat, 6:20-6:45 pm'),
-    ('driveSlot6', 'Sat, 8:45-9:30 pm'),
-    ('driveSlot7', 'Sun, 8:15-8:45 am'),
+    ('driveSlot1', '1 Fri, 8:45-9:30 pm'),
+    ('driveSlot2', '2 Sat, 9:50-10:30 am'),
+    ('driveSlot3', '3 Sat, 11:50-4:00 pm'),
+    ('driveSlot4', '4 Sat, 6:20-6:45 pm'),
+    ('driveSlot5', '5 Sat, 8:50-9:30 pm'),
+    ('driveSlot6', '6 Sun, 8:20-8:45 am'),
 )
 
 # Create your models here.
@@ -59,11 +59,24 @@ class Parent(Contact):
     host = models.BooleanField(default=False)
 
 
+class Driver(Contact):
+    carCapacity = models.IntegerField()
+    bgCheck = models.BooleanField(default=False)
+    tshirtSize = models.CharField(max_length=4, choices=SHIRT_SIZES, default='M')
+
+
 class HostHome(Contact):
     parent = models.ForeignKey(Parent, on_delete=models.CASCADE, null=True, blank=True)
     grade = models.CharField(max_length=15, choices=GRADE_CHOICES, default='?')
     gender = models.CharField(max_length=2, choices=(('M', 'Male'), ('F', 'Female')), default='M')
     bgCheck = models.BooleanField(default=False)
+    tshirtSize = models.CharField(max_length=16, choices=SHIRT_SIZES, default='M')
+
+
+class Leader(Contact):
+    hostHome = models.ForeignKey(HostHome, on_delete=models.CASCADE, null=True, blank=True)
+    bgCheck = models.BooleanField(default=False)
+    tshirtSize = models.CharField(max_length=16, choices=SHIRT_SIZES, default='M')
 
 
 class Student(Contact):
@@ -76,25 +89,29 @@ class Student(Contact):
     amountPaid = models.DecimalField(max_digits=4, decimal_places=2, default=0.00)
     churchMember = models.BooleanField(default=False)
     medicalForm = models.BooleanField(default=False)
-    tshirtSize = models.CharField(max_length=4, choices=SHIRT_SIZES, default='M')
+    tshirtSize = models.CharField(max_length=16, choices=SHIRT_SIZES, default='M')
     parentPhone = usmodels.PhoneNumberField(default='')
 
 
-class Driver(Contact):
-    hostHome = models.ForeignKey(HostHome, on_delete=models.CASCADE, null=True, blank=True)
-    carCapacity = models.IntegerField()
-    bgCheck = models.BooleanField(default=False)
-    driveSlot1 = models.BooleanField(default=False)
-    driveSlot2 = models.BooleanField(default=False)
-    driveSlot3 = models.BooleanField(default=False)
-    driveSlot4 = models.BooleanField(default=False)
-    driveSlot5 = models.BooleanField(default=False)
-    driveSlot6 = models.BooleanField(default=False)
-    driveSlot7 = models.BooleanField(default=False)
-
-
 class Cook(Contact):
+    tshirtSize = models.CharField(max_length=4, choices=SHIRT_SIZES, default='M')
+
+
+class Meal(models.Model):
     hostHome = models.ForeignKey(HostHome, on_delete=models.CASCADE, null=True, blank=True)
-    meal1 = models.BooleanField(default=False)
-    meal2 = models.BooleanField(default=False)
+    cook = models.ForeignKey(Cook, on_delete=models.CASCADE, null=True, blank=True)
+    time = models.CharField(max_length=40, default='')
+
+    def __str__(self):
+        return "%s %s - %s @ %s" % (self.cook.firstName, self.cook.lastName, self.time, self.hostHome.lastName)
+
+
+class DriveSlot(models.Model):
+    hostHome = models.ForeignKey(HostHome, on_delete=models.CASCADE, null=True, blank=True)
+    drivers = models.ManyToManyField(Driver)
+    # time = models.DateTimeField(null=True, blank=True)
+    time = models.CharField(max_length=20, default='')
+
+    def __str__(self):
+        return "%s @ %s - %d drivers" % (self.time, self.hostHome.lastName, self.drivers.count())
 

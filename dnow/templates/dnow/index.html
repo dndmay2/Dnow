@@ -4,12 +4,17 @@
 
 {% block content %}
 <h1>Students</h1>
+
 {% if studentList %}
-    <ul>
-    {% for student in studentList %}
-        <li><a href="{% url 'student' student.id %}">{{ student.firstName }} {{student.lastName}}</a></li>
-    {% endfor %}
-    </ul>
+    <table summary="Student Table">
+        <tr><th>Gender</th><th>Grade</th><th>Name</th></tr>
+        {% for student in studentList %}
+            <tr><td>{{ student.gender}}</td>
+                <td>{{ student.grade }}</td>
+                <td><a href="{% url 'student' student.id %}">{{ student.firstName }} {{student.lastName}}</a></td>
+            </tr>
+        {% endfor %}
+    </table>
 {% else %}
     <p>No students in db.</p>
 {% endif %}

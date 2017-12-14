@@ -9,16 +9,18 @@
 </head>
 <body>
     <div class="header">
-        <img src="{% static 'dnow/images/Dnow-header.jpg' %}" alt="dnow-header.png"/>
+        <img src="{% static 'dnow/images/dnow2018Header.png' %}" alt="dnow2018Header.png"/>
+{#        <img src="{% static 'dnow/images/dnow2018crop.jpg' %}" alt="dnow2018crop.png"/>#}
     </div>
     <div class="sidebar">
         {% block sidebar %}
         <ul>
             <li><a href="/admin">Admin</a></li>
-            <li><a href="/dnow/">Home</a></li>
+            <li><a href="/dnow/">Main</a></li>
             <li><a href="/dnow/all_hosthomes/">Host Homes</a></li>
             <li><a href="/dnow/all_drivers/">Drivers</a></li>
             <li><a href="/dnow/all_cooks/">Cooks</a></li>
+            <li><a href="/dnow/all_leaders/">Leaders</a></li>
             <li><a href="/dnow/spreadsheet/">Read Spreadsheet</a></li>
         </ul>
         {% endblock %}

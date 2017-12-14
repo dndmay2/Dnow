@@ -1,0 +1,30 @@
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'dnow/css/style.css' %}" />
+    {% block addstyle %}{% endblock %}
+</head>
+{% block studentTable %}
+{% if studentList %}
+    <h2>Students</h2>
+    <h4>Total # students = {{ studentList|length }}</h4>
+    <table summary="Student Table">
+        <tr>
+            <th>Name</th>
+            <th>Grade</th>
+            <th>Phone</th>
+            <th>T-Shirt</th>
+        </tr>
+        {% for student in studentList %}
+            <tr>
+                <td><a href="{% url 'student' student.id %}">{{ student.firstName }} {{student.lastName}}</a></td>
+                <td>{{ student.grade}}</td>
+                <td>{{ student.phone}}</td>
+                <td>{{ student.tshirtSize }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No students in db.</p>
+{% endif %}
+{% endblock %}

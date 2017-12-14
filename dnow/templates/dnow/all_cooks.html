@@ -5,11 +5,26 @@
 {% block content %}
 <h1>Cooks</h1>
 {% if cooksList %}
-    <ul>
-    {% for cook in cooksList %}
-        <li><a href="{% url 'cook' cook.id %}">{{ cook.firstName }} {{cook.lastName}}</a></li>
-    {% endfor %}
-    </ul>
+    <table summary="Cook Table">
+        <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Fri Meal Host Home</th>
+            <th>Sat Meal Host Home</th>
+        </tr>
+        {% for cook in cooksList %}
+            {% url 'hosthome' cook.mealHostHomes.all.0 as hh1 %}
+            {% url 'hosthome' cook.mealHostHomes.all.1 as hh2 %}
+            <tr>
+                <td><a href="{% url 'cook' cook.id %}">{{ cook.firstName }} {{cook.lastName}}</a></td>
+                <td>{{ cook.phone }}</td>
+                <td><a href="mailto:{{ cook.email }}">{{ cook.email }}</a></td>
+                <td><a href="{{ hh1 }}">{{cook.mealHostHomes.all.0.lastName}}</a></td>
+                <td><a href="{{ hh2 }}">{{cook.mealHostHomes.all.1.lastName}}</a></td>
+            </tr>
+        {% endfor %}
+    </table>
 {% else %}
     <p>No cooks in db.</p>
 {% endif %}

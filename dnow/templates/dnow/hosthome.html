@@ -5,15 +5,34 @@
 {% block title %}DNOW Host Homes Page{% endblock %}
 
 {% block content %}
-    <h2>{{ hosthome.firstName }} {{ hosthome.lastName }}</h2>
+    <a href="/dnow/hosthomes/{{ prev }}">&laquo; previous</a>
+    <a href="/dnow/hosthomes/{{ next }}">next &raquo;</a>
+    <h1>Host home: {{ hosthome.firstName }} {{ hosthome.lastName }}</h1>
+    <h3>
     <p> {{ hosthome.street }}<br>
         {{ hosthome.city }}, {{ hosthome.state }} {{ hosthome.zipCode }}
     </p>
+    </h3>
     <p><b>Phone:</b> {{ hosthome.phone }}</p>
     <p><b>Email:</b> <a href="mailto:{{ hosthome.email }}">{{ hosthome.email }}</a></p>
     <p><b>Background Check?  </b>{{ hosthome.bgCheck|yesno:"yes,no" }}</p>
     <p><b>Grade(s): </b> {{ hosthome.grade }}</p>
     <p><b>Gender: </b> {{ hosthome.gender }}</p>
+    <p><b>T Shirts: </b> {{ hosthome.tshirtSize }}</p>
+    <h2>Cooks</h2>
+    {% for meal in mealList %}
+        <p><b>{{ meal.time }}:</b> {{ meal.cook.firstName }} {{ meal.cook.lastName }}, {{ meal.cook.phone }} (T-shirt - {{ meal.cook.tshirtSize }}) </p>
+    {% endfor %}
+    <h2>Leaders</h2>
+    {% for leader in leaderList %}
+        <p>{{ leader.firstName }} {{ leader.lastName }}, {{ leader.phone }} (T-shirt - {{ leader.tshirtSize }})</p>
+    {% endfor %}
+    <h2>Drivers</h2>
+    {{ driverHtml|safe }}
+    {% include "dnow/studentMiniTable.html" %}
+    <p>
+     ...
+    </p>
 {% endblock %}
 
 
@@ -29,7 +48,7 @@
         }
 
         function geocodeAddress(geocoder, resultsMap) {
-          var address = "{{ hosthome.street }} {{ hosthome.city }} {{ hosthome.state }}";
+          var address = "{{ hosthome.street|default:'611 E Stacy Rd' }} {{ hosthome.city|default:'Fairview' }} {{ hosthome.state|default:'TX' }}";
           //var address = document.getElementById('address').value;
           geocoder.geocode({'address': address}, function(results, status) {
             if (status === 'OK') {

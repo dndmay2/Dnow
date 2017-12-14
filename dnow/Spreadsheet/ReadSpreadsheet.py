@@ -7,6 +7,8 @@ from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
 from dateutil.parser import parse
+from django.db import DataError
+from django.core.exceptions import ObjectDoesNotExist
 
 from dnow.models import *
 
@@ -20,6 +22,10 @@ APPLICATION_NAME = 'Google Sheets API Python Quickstart'
 STUDENT_COLUMNS = {}
 HOST_COLUMNS = {}
 COOK_COLUMNS = {}
+LEADER_COLUMNS = {}
+DRIVER_COLUMNS = {}
+MEAL1 = 'Fri Snacks'
+MEAL2 = 'Sat Dinner'
 
 
 def colToNum(colStr):
@@ -98,14 +104,22 @@ def getShirtSize(size):
         return 'L'
     elif size in ['s', 'sm', 'small']:
         return 'S'
-    elif size in ['xl', 'extra large', 'xtra large', 'x-large', 'xtra-large', 'xlarge']:
+    elif size in ['xl', 'extra large', 'xtra large', 'x-large', 'xtra-large', 'xlarge', 'x large']:
         return 'XL'
     elif size in ['xxl', '2xl', 'double xl', 'xx-large']:
         return 'XXL'
     elif size in ['xxxl', '3xl', 'triple xl', 'xxx-large']:
         return 'XXXL'
+    elif size in [ '', 'na', '-' ]:
+        return '-'
+    elif ',' in size:
+        sizes = size.split(',')
+        newSizes = []
+        for s in sizes:
+            newSizes.append(getShirtSize(s.strip()))
+        return ', '.join(newSizes)
     else:
-        return '?'
+        return size + '?'
 
 def getBoolean(val):
     val = val.lower()
@@ -147,6 +161,11 @@ class ReadSpreadsheet:
         self.spreadsheetId = '1pknbr9iBFb-9e-Lt5wiwa74TWl9mJu6d4jVkHtJPV6E'
         self.hostLastName = self.hostFirstName = self.hostGrade = self.hostGender = self.hostPhone = None
         self.hostEmail = self.hostAddress = self.hostBgCheck = None
+        self.cleanup()
+
+    def cleanup(self):
+        Meal.objects.all().delete()
+        DriveSlot.objects.all().delete()
 
     def getRangeValues(self, rangeName):
         result = self.service.spreadsheets().values().get(spreadsheetId=self.spreadsheetId, range=rangeName).execute()
@@ -168,7 +187,7 @@ class ReadSpreadsheet:
                 self.readStudentRow(row)
 
         for obj in Student.objects.all():
-            print(obj)
+            print('Student', obj)
 
     def readColumnHeaders(self, header, table):
         colNum = 0
@@ -179,6 +198,10 @@ class ReadSpreadsheet:
                 HOST_COLUMNS[c] = colNum
             elif table == 'cooks':
                 COOK_COLUMNS[c] = colNum
+            elif table == 'leaders':
+                LEADER_COLUMNS[c] = colNum
+            elif table == 'drivers':
+                DRIVER_COLUMNS[c] = colNum
             colNum += 1
 
     def readStudentRow(self, row):
@@ -202,10 +225,16 @@ class ReadSpreadsheet:
                 s.friendName = readCell(row, col=STUDENT_COLUMNS['List ONE friend you would like to room with (we will try to accommodate, but we cannot promise to do so)'])
                 s.parentPhone = readCell(row, col=STUDENT_COLUMNS['Parent Cell Number'])
                 s.parentEmail = readCell(row, col=STUDENT_COLUMNS['Parent Email'])
+                hostHome = readCell(row, col=STUDENT_COLUMNS['Host Home'])
+                if hostHome:
+                    try:
+                        hhObj = HostHome.objects.get(lastName=hostHome)
+                        s.hostHome = hhObj
+                    except:
+                        print('No host home for %s %s: .%s.' % (studentFirstName, studentLastName, hostHome))
                 s.save()
-        except:
-            print('Error with student row:', row)
-            print(s.dateRegistered, s.amountPaid, s.churchMember, s.medicalForm, s.tshirtSize)
+        except Exception as e:
+            print('Error with student row:', row, e)
             print(sys.exc_info())
 
     def readHosts(self):
@@ -215,6 +244,7 @@ class ReadSpreadsheet:
             print('No data found.')
         else:
             HostHome.objects.all().delete()
+            DriveSlot.objects.all().delete()
             header = values[0]
             data = values[1:]
             self.readColumnHeaders(header, 'hosts')
@@ -222,9 +252,10 @@ class ReadSpreadsheet:
                 self.readHostRow(row)
 
         for obj in HostHome.objects.all():
-            print(obj)
+            print('Host Home', obj)
 
     def readHostRow(self, row):
+        hh = None
         try:
             hostLastName = readCell(row, col=HOST_COLUMNS['Last Name'])
             hostFirstName = '' # readCell(row, col=HOST_COLUMNS[''])
@@ -239,19 +270,25 @@ class ReadSpreadsheet:
                 hh.state = readCell(row, col=HOST_COLUMNS['State'])
                 hh.zip = readCell(row, col=HOST_COLUMNS['Zip'])
                 hh.bgCheck = getBoolean(readCell(row, col=HOST_COLUMNS['Background Check?']))
+                hh.tshirtSize = getShirtSize(readCell(row, col=HOST_COLUMNS['T-Shirt Size']))
                 hh.save()
         except Exception as e:
             print('Error with hosthome row:', row, e)
+        if hh:
+            for ds in DRIVE_SLOTS:
+                driveSlot = DriveSlot(hostHome=hh, time=ds[1])
+                driveSlot.save()
 
 
     def readCooks(self):
-        rangeName = 'Meals!A2:F'
+        rangeName = 'Meals!A2:G'
         values = self.getRangeValues(rangeName)
 
         if not values:
             print('No data found.')
         else:
             Cook.objects.all().delete()
+            Meal.objects.all().delete()
             header = values[0]
             data = values[1:]
             self.readColumnHeaders(header, 'cooks')
@@ -259,7 +296,7 @@ class ReadSpreadsheet:
                 self.readCookRow(row)
 
         for obj in Cook.objects.all():
-            print(obj)
+            print('Cook', obj)
 
     def readCookRow(self, row):
         try:
@@ -269,16 +306,117 @@ class ReadSpreadsheet:
                 c = Cook(firstName=cookFirstName, lastName=cookLastName)
                 c.phone = readCell(row, col=COOK_COLUMNS['Cell'] )
                 c.email = readCell(row, col=COOK_COLUMNS['Email'] )
-                meal1 = readCell(row, col=COOK_COLUMNS['Sat Dinner'] )
-                c.meal1 = c.meal2 = False
-                if meal1 != '':
-                    c.meal1 = True
-                meal2 = readCell(row, col=COOK_COLUMNS['Sat Snacks'] )
-                if meal2 != '':
-                    c.meal2 = True
+                meal1 = readCell(row, col=COOK_COLUMNS[MEAL1] )
+                hhObj1 = hhObj2 = False
                 c.save()
-        except Exception as e:
+                if meal1 != '' and meal1 != 'NA':
+                    try:
+                        hhObj1 = HostHome.objects.get(lastName=meal1)
+                        m = Meal(cook=c, time=MEAL1, hostHome=hhObj1)
+                        m.save()
+                        print("Meal = %s" % m)
+                    except Exception as e:
+                        print('No host home for %s %s meal1: .%s. (%s)' % (cookFirstName, cookLastName, meal1, e))
+                meal2 = readCell(row, col=COOK_COLUMNS[MEAL2] )
+                if meal2 != '' and meal2 != 'NA':
+                    try:
+                        hhObj2 = HostHome.objects.get(lastName=meal2)
+                        m = Meal(cook=c, time=MEAL2, hostHome=hhObj2)
+                        m.save()
+                        print("Meal = %s" % m)
+                    except Exception as e:
+                        print('No host home for %s %s meal2: .%s. (%s)' % (cookFirstName, cookLastName, meal2, e))
+
+        except DataError as e:
             print('Error with cook row:', row, e)
+
+
+    def readLeaders(self):
+        rangeName = 'Leaders!B3:N'
+        values = self.getRangeValues(rangeName)
+
+        if not values:
+            print('No data found.')
+        else:
+            Leader.objects.all().delete()
+            header = values[0]
+            data = values[1:]
+            self.readColumnHeaders(header, 'leaders')
+            for row in data:
+                self.readLeaderRow(row)
+
+        for obj in Leader.objects.all():
+            print('Leader', obj)
+
+    def readLeaderRow(self, row):
+        try:
+            leaderFirstName = readCell(row, col=LEADER_COLUMNS['First Name'] )
+            leaderLastName = readCell(row, col=LEADER_COLUMNS['Last Name'] )
+            if (leaderFirstName and leaderFirstName != 'NA') or (leaderLastName and leaderLastName != 'NA'):
+                ldr = Leader(firstName=leaderFirstName, lastName=leaderLastName)
+                ldr.phone = readCell(row, col=LEADER_COLUMNS['Cell'] )
+                ldr.email = readCell(row, col=LEADER_COLUMNS['Email'] )
+                ldr.tshirtSize = getShirtSize(readCell(row, col=LEADER_COLUMNS['T-Shirt Size']))
+                ldr.bgCheck = getBoolean(readCell(row, col=LEADER_COLUMNS['Background Check?']))
+                hostHome = readCell(row, col=LEADER_COLUMNS['Host Home'])
+                if hostHome:
+                    try:
+                        hhObj = HostHome.objects.get(lastName=hostHome)
+                        ldr.hostHome = hhObj
+                    except:
+                        print('No host home for %s %s: .%s.' % (leaderFirstName, leaderLastName, hostHome))
+                ldr.save()
+        except Exception as e:
+            print('Error with leader row:', row, e)
+
+    def readDrivers(self):
+        rangeName = 'Drivers!A2:M'
+        values = self.getRangeValues(rangeName)
+
+        if not values:
+            print('No data found.')
+        else:
+            Driver.objects.all().delete()
+            header = values[0]
+            data = values[1:]
+            self.readColumnHeaders(header, 'drivers')
+            for row in data:
+                self.readDriverRow(row)
+
+        for obj in Driver.objects.all():
+            print('Driver', obj)
+
+    def readDriverRow(self, row):
+        try:
+            driverFirstName = readCell(row, col=DRIVER_COLUMNS['First Name'] )
+            driverLastName = readCell(row, col=DRIVER_COLUMNS['Last Name'] )
+            if (driverFirstName and driverFirstName != 'NA') or (driverLastName and driverLastName != 'NA'):
+                d = Driver(firstName=driverFirstName, lastName=driverLastName)
+                d.phone = readCell(row, col=DRIVER_COLUMNS['Cell'] )
+                d.email = readCell(row, col=DRIVER_COLUMNS['Email'] )
+                cc = readCell(row, col=DRIVER_COLUMNS['How many can they fit?'])
+                if cc == '' or cc == 'NA':
+                    print('%s car capacity is unknown! =%s=, defaulting to 3' % (d, cc))
+                    d.carCapacity = 3
+                else:
+                    d.carCapacity = cc
+                d.tshirtSize = getShirtSize(readCell(row, col=DRIVER_COLUMNS['T-shirt']))
+                d.bgCheck = getBoolean(readCell(row, col=DRIVER_COLUMNS['Background Check?']))
+                d.save()
+                for ds in DRIVE_SLOTS:
+                    time = ds[1]
+                    hostHome = readCell(row, col=DRIVER_COLUMNS[time])
+                    try:
+                        hhObj = HostHome.objects.get(lastName=hostHome)
+                        driveSlot = hhObj.driveslot_set.get(time=time)
+                        driveSlot.drivers.add(d)
+                    except ObjectDoesNotExist:
+                        driveSlot = '%s - No hostHome assigned for %s' % (time, d)
+                    print(driveSlot)
+
+
+        except DataError as e:
+            print('Error with driver row:', row, e)
 
 
 

@@ -10,18 +10,18 @@
     <p><b>Phone:</b> {{ driver.phone }}</p>
     <p><b>Email:</b> <a href="mailto:{{ driver.email }}">{{ driver.email }}</a></p>
     <p><b>Background Check?  </b>{{ driver.bgCheck|yesno:"yes,no" }}</p>
-    <p><b>HostHome:</b>
-        <a href="{% url 'hosthome' driver.hostHome.id %}">{{ driver.hostHome.firstName }} {{driver.hostHome.lastName}}</a>
-    </p>
-    <h3>Drive Times</h3>
-    <ul>
-        <li> {{ DRIVE_SLOTS.driverSlot1 }} {{ driver.driveSlot1|yesno:"yes,no" }}</li>
-        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot2|yesno:"yes,no" }}</li>
-        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot3|yesno:"yes,no" }}</li>
-        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot4|yesno:"yes,no" }}</li>
-        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot5|yesno:"yes,no" }}</li>
-        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot6|yesno:"yes,no" }}</li>
-        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot7|yesno:"yes,no" }}</li>
-    </ul>
+{#    <p><b>HostHome:</b>#}
+{#        <a href="{% url 'hosthome' driver.hostHome.id %}">{{ driver.hostHome.firstName }} {{driver.hostHome.lastName}}</a>#}
+{#    </p>#}
+{#    <h3>Drive Times</h3>#}
+{#    <ul>#}
+{#        <li> {{ DRIVE_SLOTS.driverSlot1 }} {{ driver.driveSlot1|yesno:"yes,no" }}</li>#}
+{#        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot2|yesno:"yes,no" }}</li>#}
+{#        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot3|yesno:"yes,no" }}</li>#}
+{#        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot4|yesno:"yes,no" }}</li>#}
+{#        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot5|yesno:"yes,no" }}</li>#}
+{#        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot6|yesno:"yes,no" }}</li>#}
+{#        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot7|yesno:"yes,no" }}</li>#}
+{#    </ul>#}
 
 {% endblock %}
