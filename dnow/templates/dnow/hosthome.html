@@ -21,7 +21,7 @@
     <p><b>T Shirts: </b> {{ hosthome.tshirtSize }}</p>
     <h2>Cooks</h2>
     {% for meal in mealList %}
-        <p><b>{{ meal.time }}:</b> {{ meal.cook.firstName }} {{ meal.cook.lastName }}, {{ meal.cook.phone }} (T-shirt - {{ meal.cook.tshirtSize }}) </p>
+        <p><b>{{ meal.time }}:</b> {{ meal.cook.firstName }} {{ meal.cook.lastName }}, {{ meal.cook.phone }} </p>
     {% endfor %}
     <h2>Leaders</h2>
     {% for leader in leaderList %}

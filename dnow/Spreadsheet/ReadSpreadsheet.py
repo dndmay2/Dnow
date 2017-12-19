@@ -82,7 +82,7 @@ def getGrade(grade):
     """
     Returns grade without strings in it
     """
-    grade = ''.join(c for c in grade if c.isdigit() or c == ',')
+    grade = ''.join(c for c in grade if c.isdigit() or c == ',' or c == '-')
     if grade == '':
         grade = '?'
     return grade
@@ -358,6 +358,7 @@ class ReadSpreadsheet:
                 ldr.email = readCell(row, col=LEADER_COLUMNS['Email'] )
                 ldr.tshirtSize = getShirtSize(readCell(row, col=LEADER_COLUMNS['T-Shirt Size']))
                 ldr.bgCheck = getBoolean(readCell(row, col=LEADER_COLUMNS['Background Check?']))
+                ldr.isDriving = getBoolean(readCell(row, col=LEADER_COLUMNS['Driving?']))
                 hostHome = readCell(row, col=LEADER_COLUMNS['Host Home'])
                 if hostHome:
                     try:
@@ -397,7 +398,7 @@ class ReadSpreadsheet:
                 cc = readCell(row, col=DRIVER_COLUMNS['How many can they fit?'])
                 if cc == '' or cc == 'NA':
                     print('%s car capacity is unknown! =%s=, defaulting to 3' % (d, cc))
-                    d.carCapacity = 3
+                    d.carCapacity = 4
                 else:
                     d.carCapacity = cc
                 d.tshirtSize = getShirtSize(readCell(row, col=DRIVER_COLUMNS['T-shirt']))

@@ -99,8 +99,8 @@ def spreadsheet(request):
         ss.readHosts()
         ss.readStudents()
         ss.readCooks()
-        ss.readLeaders()
         ss.readDrivers()
+        ss.readLeaders()
     return render(request, 'dnow/spreadsheet.html')
 
 

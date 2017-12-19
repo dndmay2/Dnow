@@ -77,6 +77,7 @@ class Leader(Contact):
     hostHome = models.ForeignKey(HostHome, on_delete=models.CASCADE, null=True, blank=True)
     bgCheck = models.BooleanField(default=False)
     tshirtSize = models.CharField(max_length=16, choices=SHIRT_SIZES, default='M')
+    isDriving = models.BooleanField(default=False)
 
 
 class Student(Contact):
@@ -94,7 +95,7 @@ class Student(Contact):
 
 
 class Cook(Contact):
-    tshirtSize = models.CharField(max_length=4, choices=SHIRT_SIZES, default='M')
+    tshirtSize = models.CharField(max_length=4, choices=SHIRT_SIZES, default='-')
 
 
 class Meal(models.Model):
