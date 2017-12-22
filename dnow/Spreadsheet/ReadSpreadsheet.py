@@ -17,7 +17,7 @@ from dnow.models import *
 # If modifying these scopes, delete your previously saved credentials
 # at ~/.credentials/sheets.googleapis.com-python-quickstart.json
 SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
-CLIENT_SECRET_FILE = 'client_secret.json'
+CLIENT_SECRET_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'client_secret.json')
 APPLICATION_NAME = 'Google Sheets API Python Quickstart'
 STUDENT_COLUMNS = {}
 HOST_COLUMNS = {}
