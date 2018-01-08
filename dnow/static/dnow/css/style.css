@@ -14,9 +14,11 @@
         left:178px; top:159px; right:0; bottom:0;
         border: 10px solid White;
     }
-    input[type=submit] {
+    input[type=button], input[type=submit] {
         width: 180px;  height: 40px;
-        border: none;
+        background-color: #f8ef26;
+        border: 1px;
+        color: #462164;
         font-size: 14px;
     }
     table, th, td {
@@ -30,3 +32,36 @@
         background-color: #f8ef26;
         color: #462164;
     }
+    button {
+        width: 180px;  height: 40px;
+        background-color: #f8ef26;
+        border: 11;
+        color: #462164;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+    }
+
+/*input[type=text] {*/
+    /*padding:5px;*/
+    /*border:2px solid #ccc;*/
+    /*-webkit-border-radius: 5px;*/
+    /*border-radius: 5px;*/
+/*}*/
+
+/*input[type=text]:focus {*/
+    /*border-color:#333;*/
+/*}*/
+
+/*input[type=submit] {*/
+    /*padding:5px 15px;*/
+    /*background:#ccc;*/
+    /*border:0 none;*/
+    /*cursor:pointer;*/
+    /*-webkit-border-radius: 5px;*/
+    /*border-radius: 5px;*/
+/*}*/

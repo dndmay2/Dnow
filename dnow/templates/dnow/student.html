@@ -3,6 +3,8 @@
 {% block title %}DNOW Student Admin Page{% endblock %}
 
 {% block content %}
+    <a href="/dnow/student/{{ prev }}">&laquo; previous</a>
+    <a href="/dnow/student/{{ next }}">next &raquo;</a>
     <h2>{{ student.firstName }} {{ student.lastName }} </h2>
     <p> {{ student.street }}<br>
         {{ student.city }}, {{ student.state }} {{ student.zipCode }}
@@ -37,6 +39,4 @@
 {#    <p><b>Email:</b> <a href="mailto:{{ student.email }}">{{ student.email }}</a></p>#}
 {#    <p><b>Parent:</b> <a href="{%  url 'parent' student.parent.id %}">#}
 {#        {{ student.parent.firstName }} {{ student.parent.lastName }}</a></p>#}
-    <a href="/dnow/student/{{ prev }}">&laquo; previous</a>
-    <a href="/dnow/student/{{ next }}">next &raquo;</a>
 {% endblock %}

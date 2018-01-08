@@ -3,25 +3,21 @@
 {% block title %}DNOW Driver Admin Page{% endblock %}
 
 {% block content %}
+    <a href="/dnow/driver/{{ prev }}">&laquo; previous</a>
+    <a href="/dnow/driver/{{ next }}">next &raquo;</a>
     <h2>{{ driver.firstName }} {{ driver.lastName }} </h2>
-    <p> {{ driver.street }}<br>
-        {{ driver.city }}, {{ driver.state }} {{ driver.zipCode }}
-    </p>
     <p><b>Phone:</b> {{ driver.phone }}</p>
     <p><b>Email:</b> <a href="mailto:{{ driver.email }}">{{ driver.email }}</a></p>
     <p><b>Background Check?  </b>{{ driver.bgCheck|yesno:"yes,no" }}</p>
+    <p><b>Num Seats:</b>  {{ driver.carCapacity }}</p>
+
 {#    <p><b>HostHome:</b>#}
 {#        <a href="{% url 'hosthome' driver.hostHome.id %}">{{ driver.hostHome.firstName }} {{driver.hostHome.lastName}}</a>#}
+{#        html += '<td><a href="/dnow/hosthomes/%s">%s</a></td>' % (hh.id, hh.lastName)#}
 {#    </p>#}
-{#    <h3>Drive Times</h3>#}
-{#    <ul>#}
-{#        <li> {{ DRIVE_SLOTS.driverSlot1 }} {{ driver.driveSlot1|yesno:"yes,no" }}</li>#}
-{#        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot2|yesno:"yes,no" }}</li>#}
-{#        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot3|yesno:"yes,no" }}</li>#}
-{#        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot4|yesno:"yes,no" }}</li>#}
-{#        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot5|yesno:"yes,no" }}</li>#}
-{#        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot6|yesno:"yes,no" }}</li>#}
-{#        <li> {{ DRIVE_SLOTS }} {{ driver.driveSlot7|yesno:"yes,no" }}</li>#}
-{#    </ul>#}
+    <h3>Drive Times</h3>
+    {{ driveSlotsHtml|safe }}
+    {{ hostHomeHtml|safe }}
+
 
 {% endblock %}

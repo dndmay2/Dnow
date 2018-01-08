@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DNOW 2018 Host Home Email</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 2px;
+        }
+    </style>
+
+</head>
+<body>
+    <p>Dear parent of {{ student.firstName }} {{ student.lastName }},</p>
+    The DNOW weekend starts this Friday (January 12-14, 2018).
+    Your student will be staying at the {{ hostHome.lastName }} host home.
+    Please arrive at Cottonwood Creek Church between 5:30-6:30PM to checkin.
+
+    <p> <a href="https://maps.google.com/?q=1015 Sam Rayburn Tollway+Allen+TX+75013">
+        Cottonwood Creek Church<br>
+        1015 Sam Rayburn Tollway, Allen, TX 75013
+    </a>
+    </p>
+    <h3>IMPORTANT: Information needed</h3>
+    <ol>
+    <li>If your child will be missing time this weekend for other commitments, please let us know when they will be gone ASAP.
+        This information is extremely helpful in our driving logistics. Please reply to this email with time your child will be away.</li>
+    {% if student.medicalForm %}
+        <li>We show that you have turned in your medical form. Thank you.</li>
+    {% else %}
+        <li><span style="background-color: #FFFF00">MEDICAL FORMS MISSING!!! Please send your medical release forms to lpanell@chaseoaks.org.</span></li>
+    {% endif %}
+    <br>
+    </ol>
+    {{ hostHomeBaseHtml|safe }}
+    <p>
+        <h3>What To Bring</h3>
+        <ul>
+            <li>Bible and Pen</li>
+            <li>Towel</li>
+            <li>Toiletries</li>
+            <li>Clothes and shoes for 3days</li>
+            <li><span style="background-color: #FFFF00">Favorite snack to share</span></li>
+            <li><span style="background-color: #FFFF00">2 liter soft drink to share</span></li>
+            <li>Sleeping bag</li>
+            <li>Pillow</li>
+        </ul>
+    </p>
+
+    <p> You will pick up your student on Sunday at 10:35am at the Chase Oaks Sloan Creek Campus.<br>
+        <a href="https://maps.google.com/?q=611 E Stacy Rd+Fairview+TX+75069">
+        Chase Oaks Sloan Creek Campus<br>
+        611 E Stacy Rd, Fairview, TX 75069
+    </a>
+    </p>
+
+
+    If you have any questions or concerns, you can contact:<br>
+    {{ churchStaffHtml|safe }}
+    Thank you for all you do.<br>
+    The DNOW team
+
+</body>
+</html>

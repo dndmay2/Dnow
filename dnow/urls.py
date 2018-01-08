@@ -6,6 +6,8 @@ urlpatterns = [
     # ex: /dnow/
     url(r'^$', views.index, name='index'),
     url(r'^spreadsheet/.*', views.spreadsheet, name='spreadsheet'),
+    url(r'^spreadsheetLog/$', views.viewSpreadSheetLog, name='spreadsheetLog'),
+    url(r'^email/$', views.email, name='email'),
     url(r'^all_hosthomes/$', views.all_hosthomes, name='all_hosthomes'),
     url(r'^all_drivers/$', views.all_drivers, name='all_drivers'),
     url(r'^all_cooks/$', views.all_cooks, name='all_cooks'),

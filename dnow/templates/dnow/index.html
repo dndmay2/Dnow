@@ -5,27 +5,9 @@
 {% block content %}
 <h1>Students</h1>
 
-{% if studentList %}
-    <table summary="Student Table">
-        <tr><th>Gender</th><th>Grade</th><th>Name</th></tr>
-        {% for student in studentList %}
-            <tr><td>{{ student.gender}}</td>
-                <td>{{ student.grade }}</td>
-                <td><a href="{% url 'student' student.id %}">{{ student.firstName }} {{student.lastName}}</a></td>
-            </tr>
-        {% endfor %}
-    </table>
+{% if studentTable %}
+    {{ studentTable|safe }}
 {% else %}
     <p>No students in db.</p>
-{% endif %}
-<h1>Parents</h1>
-{% if parentList %}
-    <ul>
-    {% for parent in parentList %}
-        <li><a href="{% url 'parent' parent.id %}">{{ parent.firstName }} {{ parent.lastName }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No parents in db.</p>
 {% endif %}
 {% endblock %}

@@ -16,3 +16,13 @@ INSTALLED_APPS += (
 ALLOWED_HOSTS = [ 'amayzing-dnow.herokuapp.com']
 
 DATABASES['default'] = dj_database_url.config()
+
+# EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+# EMAIL_FILE_PATH = '/tmp/dnow'
+# EMAIL_HOST =
+# EMAIL_HOST_PASSWORD
+# EMAIL_HOST_USER
+# EMAIL_PORT
+# EMAIL_USE_TLS
+# # EMAIL_USE_SSL
+# EMAIL_SUBJECT_PREFIX

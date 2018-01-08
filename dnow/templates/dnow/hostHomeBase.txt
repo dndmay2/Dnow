@@ -1,0 +1,12 @@
+Host home: {{ hostHome.firstName }} {{ hostHome.lastName }}
+
+{{ hostHome.street }}
+{{ hostHome.city }}, {{ hostHome.state }} {{ hostHome.zipCode }}
+
+Phone: {{ hostHome.phone }}
+Email: {{ hostHome.email }}
+Grade(s):  {{ hostHome.grade }}
+Gender:  {{ hostHome.gender }}
+{% if not driver %}
+T Shirts:  {{ hostHome.tshirtSize }}
+{% endif %}

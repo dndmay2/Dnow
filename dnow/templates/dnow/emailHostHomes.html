@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DNOW 2018 Host Home Email</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 2px;
+        }
+    </style>
+
+</head>
+<body>
+    <p>Dear {{ hostHome.lastName }} family,</p>
+    Thank you for hosting students this year. The DNOW weekend is January 12-14, 2018.
+    You will be hosting {{ studentCount }} {{ hostHome.grade }}th grade {{ gender }} and {{ leaderCount }} leaders.
+    <br>
+    Your meals will be provided by:
+    {{ cooksHtml|safe }}
+    <br>
+    Your leaders are:
+    {{ leaderHtml|safe }}
+    <br>
+    Your drivers are:
+    {{ driverHtml|safe }}
+    <br>
+    Your students are:
+    {{ studentHtml|safe }}
+    <br>
+    Your home will receive the following sizes for t-shirts for you, your leaders and your students.
+    {{ tshirtHtml|safe }}
+    <br>
+    If you have any questions or concerns, you can contact:<br>
+    {{ churchStaffHtml|safe }}
+    Thank you for all you do.<br>
+    The DNOW team
+
+</body>
+</html>

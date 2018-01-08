@@ -1,0 +1,15 @@
+<h3>Host home: {{ hostHome.firstName }} {{ hostHome.lastName }}</h3>
+<p> <a href="https://maps.google.com/?q={{ hostHome.street }}+{{ hostHome.city }},+{{ hostHome.state }}+{{ hostHome.zipCode }}">
+    {{ hostHome.street }}<br>
+    {{ hostHome.city }}, {{ hostHome.state }} {{ hostHome.zipCode }}
+    </a>
+</p>
+<p><b>Phone:</b> {{ hostHome.phone }}</p>
+<p><b>Email:</b> <a href="mailto:{{ hostHome.email }}">{{ hostHome.email }}</a></p>
+<p><b>Grade(s): </b> {{ hostHome.grade }}</p>
+<p><b>Gender: </b> {{ hostHome.gender }}</p>
+{% if not driver %}
+    <p><b>Background Check?  </b>{{ hostHome.bgCheck|yesno:"yes,no" }}</p>
+    <p><b>T Shirts: </b> {{ hostHome.tshirtSize }}</p>
+    <p><b>Allergies: </b> {{ hostHome.allergy }}</p>
+{% endif %}

@@ -1,0 +1,24 @@
+Dear {{ hostHome.lastName }} family,
+Thank you for hosting students this year. The DNOW weekend is January 12-14, 2018.
+You will be hosting {{ studentCount }} {{ hostHome.grade }}th grade {{ gender }} and {{ leaderCount }} leaders.
+
+Your meals will be provided by:
+{{ cooksHtml|safe }}
+
+Your leaders are:
+{{ leaderHtml|safe }}
+
+Your drivers are:
+{{ driverHtml|safe }}
+
+Your students are:
+{{ studentHtml|safe }}
+
+Your home will receive the following sizes for t-shirts for you, your leaders and your students.
+{{ tshirtHtml|safe }}
+
+If you have any questions or concerns, you can contact:
+{{ churchStaffHtml|safe }}
+
+Thank you for all you do.
+The DNOW team

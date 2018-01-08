@@ -13,3 +13,5 @@ gunicorn==19.7.1
 whitenoise==3.3.1
 python-dateutil==1.5
 dj-database-url==0.4.2
+tabulate==0.8.2
+

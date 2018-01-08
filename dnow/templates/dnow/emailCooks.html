@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DNOW 2018 Cooks Email</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 2px;
+        }
+    </style>
+
+</head>
+<body>
+    <p>Dear {{ cook.firstName }},</p>
+    We can't thank you enough for cooking for DNOW this year! The DNOW weekend is January 12-14, 2018.
+    You DO NOT need to provide plates, cups or cutlery, these will be provided by the church,
+    and will already be at the host home. Also, you do not need to provide drinks as this
+    will be handled by the students and the host home. Below you will find a head count and
+    the allergies identified at your host home. Please coordinate the drop off time with the
+    host home.
+    <br>
+    Here is what you are scheduled for:
+    <br>
+    <br>
+
+    {% for meal in cook.meal_set.all %}
+    Meal: <b>{{ meal.time }}</b>
+    {% endfor %}
+    <br>
+    {{ hostHomeHtml|safe }}
+
+    <p>If you have questions or issues related to this cooking assignment, please contact our
+    <b>cooking coordinator</b>:</p>
+    <b>Christi Ledebur - ledeburs5@gmail.com, 972-897-4432</b>
+    <br>
+    <br>
+    <br>
+    If you have any questions or concerns related to DNOW in general, you can contact:<br>
+    {{ churchStaffHtml|safe }}
+    Thank you for all you do.<br>
+    The DNOW team
+
+
+</body>
+</html>

@@ -8,7 +8,7 @@
     <p><b>Total Car Capacity:</b> {{ seatCount }}</p>
     <ul>
     {% for driver in driversList %}
-        <li><a href="{% url 'driver' driver.id %}">{{ driver.firstName }} {{driver.lastName}}</a></li>
+        <li><a href="{% url 'driver' driver.id %}">{{ driver.firstName }} {{driver.lastName}}</a> {{ driver.phone}} {{driver.email }}</li>
     {% endfor %}
     </ul>
 {% else %}

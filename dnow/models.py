@@ -26,11 +26,12 @@ SHIRT_SIZES = (
 DRIVE_SLOTS = (
     ('driveSlot1', '1 Fri, 8:45-9:30 pm'),
     ('driveSlot2', '2 Sat, 9:50-10:30 am'),
-    ('driveSlot3', '3 Sat, 11:50-4:00 pm'),
+    ('driveSlot3', '3 Sat, 12:30-4:00 pm'),
     ('driveSlot4', '4 Sat, 6:20-6:45 pm'),
     ('driveSlot5', '5 Sat, 8:50-9:30 pm'),
     ('driveSlot6', '6 Sun, 8:20-8:45 am'),
 )
+
 
 # Create your models here.
 class Contact(models.Model):
@@ -64,6 +65,9 @@ class Driver(Contact):
     bgCheck = models.BooleanField(default=False)
     tshirtSize = models.CharField(max_length=4, choices=SHIRT_SIZES, default='M')
 
+    def __str__(self):
+        return '%s %s' % (self.firstName, self.lastName)
+
 
 class HostHome(Contact):
     parent = models.ForeignKey(Parent, on_delete=models.CASCADE, null=True, blank=True)
@@ -71,6 +75,11 @@ class HostHome(Contact):
     gender = models.CharField(max_length=2, choices=(('M', 'Male'), ('F', 'Female')), default='M')
     bgCheck = models.BooleanField(default=False)
     tshirtSize = models.CharField(max_length=16, choices=SHIRT_SIZES, default='M')
+    allergy = models.CharField(max_length=80, default='')
+
+    def __str__(self):
+        return '%s, %s %s' % (self.lastName, self.grade, self.gender)
+
 
 
 class Leader(Contact):
@@ -78,12 +87,17 @@ class Leader(Contact):
     bgCheck = models.BooleanField(default=False)
     tshirtSize = models.CharField(max_length=16, choices=SHIRT_SIZES, default='M')
     isDriving = models.BooleanField(default=False)
+    churchStaff = models.BooleanField(default=False)
+    allergy = models.CharField(max_length=80, default='')
+
+    def __str__(self):
+        return '%s %s' % (self.firstName, self.lastName)
 
 
 class Student(Contact):
     parent = models.ForeignKey(Parent, on_delete=models.CASCADE, null=True, blank=True)
     hostHome = models.ForeignKey(HostHome, on_delete=models.CASCADE, null=True, blank=True)
-    friendName = models.CharField(max_length=40, default='')
+    friendName = models.CharField(max_length=80, default='')
     grade = models.CharField(max_length=2, choices=GRADE_CHOICES, default='?')
     gender = models.CharField(max_length=2, choices=(('M', 'Male'), ('F', 'Female')), default='M')
     dateRegistered = models.DateField(null=True, blank=True)
@@ -92,10 +106,18 @@ class Student(Contact):
     medicalForm = models.BooleanField(default=False)
     tshirtSize = models.CharField(max_length=16, choices=SHIRT_SIZES, default='M')
     parentPhone = usmodels.PhoneNumberField(default='')
+    parentEmail = models.EmailField(default='')
+    allergy = models.CharField(max_length=80, default='')
+
+    def __str__(self):
+        return '%s %s, %s %s' % (self.firstName, self.lastName, self.grade, self.gender)
 
 
 class Cook(Contact):
     tshirtSize = models.CharField(max_length=4, choices=SHIRT_SIZES, default='-')
+
+    def __str__(self):
+        return '%s %s' % (self.firstName, self.lastName)
 
 
 class Meal(models.Model):

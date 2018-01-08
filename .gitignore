@@ -8,3 +8,4 @@ staticfiles
 .env
 heroku.txt
 client_secret.json
+.credentials

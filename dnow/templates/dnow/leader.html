@@ -3,6 +3,8 @@
 {% block title %}DNOW Leader Page{% endblock %}
 
 {% block content %}
+    <a href="/dnow/leader/{{ prev }}">&laquo; previous</a>
+    <a href="/dnow/leader/{{ next }}">next &raquo;</a>
     <h2>{{ leader.firstName }} {{ leader.lastName }} </h2>
     <p> {{ leader.street }}<br>
         {{ leader.city }}, {{ leader.state }} {{ leader.zipCode }}
@@ -14,3 +16,4 @@
 {#    </p>#}
 
 {% endblock %}
+Ryder Sullivan/Mason Wallace/ Brock/Bryce Bobo

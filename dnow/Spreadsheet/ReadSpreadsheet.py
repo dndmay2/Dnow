@@ -11,6 +11,7 @@ from django.db import DataError
 from django.core.exceptions import ObjectDoesNotExist
 
 from dnow.models import *
+import dnow.config as config
 
 # https://developers.google.com/sheets/api/quickstart/python
 
@@ -24,8 +25,12 @@ HOST_COLUMNS = {}
 COOK_COLUMNS = {}
 LEADER_COLUMNS = {}
 DRIVER_COLUMNS = {}
-MEAL1 = 'Fri Snacks'
-MEAL2 = 'Sat Dinner'
+MEAL1 = 'Fri Snacks - 9:30PM'
+MEAL2 = 'Sat Dinner - 5:00PM'
+
+def printLog(s):
+    print(s)
+    config.SPREADSHEET_LOG += s + '\n'
 
 
 def colToNum(colStr):
@@ -63,16 +68,16 @@ def getCredentials():
             credentials = tools.run_flow(flow, store, flags)
         else:  # Needed only for compatibility with Python 2.6
             credentials = tools.run(flow, store)
-        print('Storing credentials to ' + credential_path)
+        printLog('Storing credentials to ' + credential_path)
     return credentials
 
 
 def readCell(row, col):
     # noinspection PyBroadException
     if isinstance(col, str):
-        print(col)
+        printLog(col)
     try:
-        val = row[col]
+        val = row[col].strip()
     except:
         val = 'NA'
     return val
@@ -142,6 +147,72 @@ def getMoney(val):
     return money
 
 
+def getAllergy(val):
+    val = val.lower()
+    if val == 'none' or val == 'na':
+        val = ''
+    val = val.replace('/', ',')
+    return val
+
+
+def checkFriendAgainstSet(friends, students):
+    yes = []
+    no = []
+    for friend in friends.split(','):
+        friend = friend.strip()
+        if ' ' in friend:
+            firstName, lastName = friend.split()
+            f1 = students.filter(firstName=firstName, lastName=lastName).first()
+            if f1:
+                yes.append(f1.lastName)
+            else:
+                # print('f1.%s.' % friend)
+                no.append(friend)
+        else:
+            f2 = students.filter(lastName=friend).first()
+            if f2:
+                yes.append(f2.lastName)
+            else:
+                f3 = students.filter(firstName=friend).first()
+                if f3:
+                    yes.append(f3.lastName)
+                else:
+                    # print('f3.%s.' % friend)
+                    no.append(friend)
+    return yes, no
+
+
+def checkStudentFriendMatchups():
+    hostHomesList = HostHome.objects.exclude(grade__contains='?').order_by('lastName')
+    allStudents = Student.objects.all()
+    friendDict = {}
+    for hh in hostHomesList:
+    # for hh in [hostHomesList.first()]:
+        print('------------------------------------------------------------------------------')
+        print('HOST HOME: %s Grade: %s Gender: %s' % (hh.lastName, hh.grade, hh.gender))
+        hhStudents = hh.student_set.all().order_by('lastName')
+        for student in hhStudents:
+            friends = student.friendName.strip()
+            if friends:
+                yes, no = checkFriendAgainstSet(friends, hhStudents)
+            else:
+                yes = []
+                no = []
+            other = ''
+            flag = ''
+            if no and not yes:
+                yes2, no2 = checkFriendAgainstSet(friends, allStudents)
+                if yes2:
+                    other = '%s found elsewhere' % '.'.join(yes2)
+                else:
+                    other = '%s not registered' % ('.'.join(no2))
+                if yes2:
+                    flag = '**'
+            print('%2s %-10s %-12s : YES: %-20s\t NO: %-20s OTHER: %s' %
+                  (flag, student.firstName, student.lastName, ','.join(yes), ','.join(no), other))
+            friendDict[student] = [ ','.join(yes), ','.join(no), other ]
+    return friendDict
+
 class ReadSpreadsheet:
     def __init__(self):
         """Shows basic usage of the Sheets API.
@@ -150,6 +221,7 @@ class ReadSpreadsheet:
         students in a sample spreadsheet:
         https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
         """
+        config.SPREADSHEET_LOG = ''
         self.credentials = getCredentials()
         self.http = self.credentials.authorize(httplib2.Http())
         discoveryUrl = 'https://sheets.googleapis.com/$discovery/rest?' 'version=v4'
@@ -173,11 +245,12 @@ class ReadSpreadsheet:
         return values
 
     def readStudents(self):
-        rangeName = 'Register!A1:AC'
+        rangeName = 'Register!A1:AF'
+        printLog('\nReading students from %s' % rangeName)
         values = self.getRangeValues(rangeName)
 
         if not values:
-            print('No data found.')
+            printLog('No data found.')
         else:
             Student.objects.all().delete()
             header = values[0]
@@ -187,7 +260,7 @@ class ReadSpreadsheet:
                 self.readStudentRow(row)
 
         for obj in Student.objects.all():
-            print('Student', obj)
+            printLog('Student: %s' % obj)
 
     def readColumnHeaders(self, header, table):
         colNum = 0
@@ -217,31 +290,33 @@ class ReadSpreadsheet:
                 s.city = readCell(row, col=STUDENT_COLUMNS['City'])
                 s.state = readCell(row, col=STUDENT_COLUMNS['State'])
                 s.zip = readCell(row, col=STUDENT_COLUMNS['Zip'])
-                # s.medicalForm = getBoolean(readCell(row, col=STUDENT_COLUMNS['']))
+                s.medicalForm = getBoolean(readCell(row, col=STUDENT_COLUMNS['Med Release']))
                 s.dateRegistered = getDate(readCell(row, col=STUDENT_COLUMNS['Date Entered']))
                 s.amountPaid = getMoney(readCell(row, col=STUDENT_COLUMNS['Amount']))
                 # s.churchMember = getBoolean(readCell(row, col=STUDENT_COLUMNS['']))
                 s.tshirtSize = getShirtSize(readCell(row, col=STUDENT_COLUMNS['Student T-shirt Size (adult)']))
-                s.friendName = readCell(row, col=STUDENT_COLUMNS['List ONE friend you would like to room with (we will try to accommodate, but we cannot promise to do so)'])
+                s.friendName = readCell(row, col=STUDENT_COLUMNS['Friend'])
                 s.parentPhone = readCell(row, col=STUDENT_COLUMNS['Parent Cell Number'])
                 s.parentEmail = readCell(row, col=STUDENT_COLUMNS['Parent Email'])
+                s.allergy = getAllergy(readCell(row, col=STUDENT_COLUMNS['Allergy']))
                 hostHome = readCell(row, col=STUDENT_COLUMNS['Host Home'])
                 if hostHome:
                     try:
                         hhObj = HostHome.objects.get(lastName=hostHome)
                         s.hostHome = hhObj
                     except:
-                        print('No host home for %s %s: .%s.' % (studentFirstName, studentLastName, hostHome))
+                        printLog('No host home for %s %s: .%s.' % (studentFirstName, studentLastName, hostHome))
                 s.save()
         except Exception as e:
-            print('Error with student row:', row, e)
+            printLog('Error with student row: %s %s' % (row, e))
             print(sys.exc_info())
 
     def readHosts(self):
         rangeName = 'Host!A2:M'
+        printLog('\nReading hosts from %s' % rangeName)
         values = self.getRangeValues(rangeName)
         if not values:
-            print('No data found.')
+            printLog('No data found.')
         else:
             HostHome.objects.all().delete()
             DriveSlot.objects.all().delete()
@@ -252,14 +327,14 @@ class ReadSpreadsheet:
                 self.readHostRow(row)
 
         for obj in HostHome.objects.all():
-            print('Host Home', obj)
+            printLog('Host Home: %s' % obj)
 
     def readHostRow(self, row):
         hh = None
         try:
             hostLastName = readCell(row, col=HOST_COLUMNS['Last Name'])
             hostFirstName = '' # readCell(row, col=HOST_COLUMNS[''])
-            if (hostFirstName and hostFirstName != 'NA') or (hostLastName and (hostLastName != 'NA' and hostLastName != '?')):
+            if (hostFirstName and hostFirstName != 'NA') or (hostLastName and (hostLastName.lower() != 'na' and hostLastName != '?')):
                 hh = HostHome(firstName=hostFirstName, lastName=hostLastName)
                 hh.grade = getGrade(readCell(row, col=HOST_COLUMNS['Grades']))
                 hh.gender = getGender(readCell(row, col=HOST_COLUMNS['Gender']))
@@ -271,9 +346,10 @@ class ReadSpreadsheet:
                 hh.zip = readCell(row, col=HOST_COLUMNS['Zip'])
                 hh.bgCheck = getBoolean(readCell(row, col=HOST_COLUMNS['Background Check?']))
                 hh.tshirtSize = getShirtSize(readCell(row, col=HOST_COLUMNS['T-Shirt Size']))
+                hh.allergy = getAllergy(readCell(row, col=HOST_COLUMNS['Allergy']))
                 hh.save()
         except Exception as e:
-            print('Error with hosthome row:', row, e)
+            printLog('Error with hosthome row: %s %s' % (row, e))
         if hh:
             for ds in DRIVE_SLOTS:
                 driveSlot = DriveSlot(hostHome=hh, time=ds[1])
@@ -282,10 +358,11 @@ class ReadSpreadsheet:
 
     def readCooks(self):
         rangeName = 'Meals!A2:G'
+        printLog('\nReading cooks from %s' % rangeName)
         values = self.getRangeValues(rangeName)
 
         if not values:
-            print('No data found.')
+            printLog('No data found.')
         else:
             Cook.objects.all().delete()
             Meal.objects.all().delete()
@@ -296,7 +373,7 @@ class ReadSpreadsheet:
                 self.readCookRow(row)
 
         for obj in Cook.objects.all():
-            print('Cook', obj)
+            printLog('Cook: %s' % obj)
 
     def readCookRow(self, row):
         try:
@@ -314,29 +391,30 @@ class ReadSpreadsheet:
                         hhObj1 = HostHome.objects.get(lastName=meal1)
                         m = Meal(cook=c, time=MEAL1, hostHome=hhObj1)
                         m.save()
-                        print("Meal = %s" % m)
+                        printLog("Meal = %s" % m)
                     except Exception as e:
-                        print('No host home for %s %s meal1: .%s. (%s)' % (cookFirstName, cookLastName, meal1, e))
+                        printLog('No host home for %s %s meal1: .%s. (%s)' % (cookFirstName, cookLastName, meal1, e))
                 meal2 = readCell(row, col=COOK_COLUMNS[MEAL2] )
                 if meal2 != '' and meal2 != 'NA':
                     try:
                         hhObj2 = HostHome.objects.get(lastName=meal2)
                         m = Meal(cook=c, time=MEAL2, hostHome=hhObj2)
                         m.save()
-                        print("Meal = %s" % m)
+                        printLog("Meal = %s" % m)
                     except Exception as e:
-                        print('No host home for %s %s meal2: .%s. (%s)' % (cookFirstName, cookLastName, meal2, e))
+                        printLog('No host home for %s %s meal2: .%s. (%s)' % (cookFirstName, cookLastName, meal2, e))
 
         except DataError as e:
-            print('Error with cook row:', row, e)
+            printLog('Error with cook row: %s %s' % (row, e))
 
 
     def readLeaders(self):
         rangeName = 'Leaders!B3:N'
+        printLog('\nReading leaders from %s' % rangeName)
         values = self.getRangeValues(rangeName)
 
         if not values:
-            print('No data found.')
+            printLog('No data found.')
         else:
             Leader.objects.all().delete()
             header = values[0]
@@ -346,7 +424,7 @@ class ReadSpreadsheet:
                 self.readLeaderRow(row)
 
         for obj in Leader.objects.all():
-            print('Leader', obj)
+            printLog('Leader: %s' % obj)
 
     def readLeaderRow(self, row):
         try:
@@ -359,23 +437,28 @@ class ReadSpreadsheet:
                 ldr.tshirtSize = getShirtSize(readCell(row, col=LEADER_COLUMNS['T-Shirt Size']))
                 ldr.bgCheck = getBoolean(readCell(row, col=LEADER_COLUMNS['Background Check?']))
                 ldr.isDriving = getBoolean(readCell(row, col=LEADER_COLUMNS['Driving?']))
+                ldr.allergy = getAllergy(readCell(row, col=LEADER_COLUMNS['Allergy']))
                 hostHome = readCell(row, col=LEADER_COLUMNS['Host Home'])
                 if hostHome:
-                    try:
-                        hhObj = HostHome.objects.get(lastName=hostHome)
-                        ldr.hostHome = hhObj
-                    except:
-                        print('No host home for %s %s: .%s.' % (leaderFirstName, leaderLastName, hostHome))
+                    if hostHome == 'Church Staff':
+                        ldr.churchStaff = True
+                    else:
+                        try:
+                            hhObj = HostHome.objects.get(lastName=hostHome)
+                            ldr.hostHome = hhObj
+                        except:
+                            printLog('No host home for %s %s: .%s.' % (leaderFirstName, leaderLastName, hostHome))
                 ldr.save()
         except Exception as e:
-            print('Error with leader row:', row, e)
+            printLog('Error with leader row: %s %s' % (row, e))
 
     def readDrivers(self):
         rangeName = 'Drivers!A2:M'
+        printLog('\nReading drivers from %s' % rangeName)
         values = self.getRangeValues(rangeName)
 
         if not values:
-            print('No data found.')
+            printLog('No data found.')
         else:
             Driver.objects.all().delete()
             header = values[0]
@@ -385,7 +468,7 @@ class ReadSpreadsheet:
                 self.readDriverRow(row)
 
         for obj in Driver.objects.all():
-            print('Driver', obj)
+            printLog('Driver: %s' % obj)
 
     def readDriverRow(self, row):
         try:
@@ -397,7 +480,7 @@ class ReadSpreadsheet:
                 d.email = readCell(row, col=DRIVER_COLUMNS['Email'] )
                 cc = readCell(row, col=DRIVER_COLUMNS['How many can they fit?'])
                 if cc == '' or cc == 'NA':
-                    print('%s car capacity is unknown! =%s=, defaulting to 3' % (d, cc))
+                    printLog('%s car capacity is unknown! =%s=, defaulting to 3' % (d, cc))
                     d.carCapacity = 4
                 else:
                     d.carCapacity = cc
@@ -413,11 +496,11 @@ class ReadSpreadsheet:
                         driveSlot.drivers.add(d)
                     except ObjectDoesNotExist:
                         driveSlot = '%s - No hostHome assigned for %s' % (time, d)
-                    print(driveSlot)
+                    printLog('%s' % driveSlot)
 
 
         except DataError as e:
-            print('Error with driver row:', row, e)
+            printLog('Error with driver row: %s %s' % (row, e))
 
 
 
