@@ -2,7 +2,7 @@ Dear parent of {{ student.firstName }} {{ student.lastName }},
 The DNOW weekend starts this Friday (January 12-14, 2018).
 Your student will be staying at the {{ hostHome.lastName }} host home.
 Please arrive at Cottonwood Creek Church between 5:30-6:30PM to checkin.
-
+The weekend schedule is attached.
 
     Cottonwood Creek Church
     1015 Sam Rayburn Tollway, Allen, TX 75013
@@ -15,7 +15,7 @@ IMPORTANT: Information needed
     {% if student.medicalForm %}
     2. We show that you have turned in your medical form. Thank you.
     {% else %}
-    2. MEDICAL FORMS MISSING!!! Please send your medical release forms to lpanell@chaseoaks.org.
+    2. MEDICAL FORMS MISSING!!! Please send your medical release forms (attached) to lpanell@chaseoaks.org.
     {% endif %}
 {{ hostHomeBaseHtml|safe }}
 What To Bring
@@ -23,7 +23,7 @@ What To Bring
     * Bible and Pen
     * Towel
     * Toiletries
-    * Clothes and shoes for 3days
+    * Clothes and shoes for 3 days
     * Favorite snack to share
     * 2 liter soft drink to share
     * Sleeping bag

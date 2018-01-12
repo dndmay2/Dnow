@@ -8,6 +8,10 @@ Drive Times
 
 {{ hostHomeHtml|safe }}
 
+Some drive times will have you traveling to Cottonwood Creek.
+    Cottonwood Creek Church
+    1015 Sam Rayburn Tollway, Allen, TX 75013
+
 If you have any questions or concerns, you can contact:
 {{ churchStaffHtml|safe }}
 

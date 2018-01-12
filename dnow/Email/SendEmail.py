@@ -14,9 +14,18 @@ def dnowEmailTest(debug=True):
     # emailDriver(driver, debug=debug)
     # cook = Cook.objects.get(lastName='Lasseter', firstName='Katie')
     # emailCook(cook, debug=debug)
-    student = Student.objects.get(lastName='May', firstName='Avery')
-    student = Student.objects.get(lastName='Weeks', firstName='Annabelle')
-    emailParent(student, debug=debug)
+    # student = Student.objects.get(lastName='May', firstName='Avery')
+
+    debug=False
+    # hh = HostHome.objects.get(lastName='Debenport')
+    # emailHostHome(hh, debug=debug)
+    # student = Student.objects.get(lastName='Stoltzfus', firstName='Judah')
+    # emailParent(student, debug=debug)
+    # student = Student.objects.get(lastName='Keepers', firstName='Alaina')
+    # emailParent(student, debug=debug)
+    # cook = Cook.objects.get(lastName='Brookhart', firstName='Jami')
+    # emailCook(cook, debug=debug)
+
 
 
 def emailHostHome(hh, debug=False):
@@ -26,9 +35,11 @@ def emailHostHome(hh, debug=False):
     msgPlain = render_to_string('dnow/emailHostHomes.txt', context=textContext)
     msgHtml = render_to_string('dnow/emailHostHomes.html', context=htmlContext)
 
+    staffList = Leader.objects.order_by('lastName').filter(churchStaff=True)
+    staffEmails = [ leader.email for leader in staffList ]
     leaderEmails = [ leader.email for leader in hh.leader_set.all() ]
-    toList = [ hh.email ] + leaderEmails
-    subject = 'DNOW Weekend: Host Home Info - %s' % (hh.lastName)
+    toList = [ hh.email ] + leaderEmails + staffEmails
+    subject = 'DNOW Weekend: Host Home Info - %s - Correction' % (hh.lastName)
     if debug:
         print('  To: ' + ', '.join(toList))
         print('  ' + subject + '\n\n')
@@ -85,7 +96,7 @@ def emailDriver(driver, debug=False):
     msgPlain = render_to_string('dnow/emailDrivers.txt', context=textContext)
     msgHtml = render_to_string('dnow/emailDrivers.html', context=htmlContext)
 
-    toList = [driver.email]
+    toList = [driver.email, 'lpannell@chaseoaks.org']
     subject = 'DNOW Weekend: Driving Info - %s' % driver.lastName
     if debug:
         print('  To: ' + ', '.join(toList))
@@ -94,15 +105,22 @@ def emailDriver(driver, debug=False):
         toList = ['dndmay2@gmail.com']
     # A debug flag besides True (like 1 or 'a') will set toList to dndmay2, but send email
     if debug is not True:
-        send_mail(
-            subject,
-            msgPlain,
-            'dndmay1@gmail.com',
-            toList,
-            html_message=msgHtml,
-            auth_user='dndmay1@gmail.com',
-            auth_password=os.environ.get('GMP'),
-        )
+        connection = get_connection()
+        connection.username = 'dndmay1@gmail.com'
+        connection.password = os.environ.get('GMP')
+        msg = EmailMultiAlternatives(subject, msgPlain, 'dndmay1@gmail.com', toList, connection=connection)
+        msg.attach_alternative(msgHtml, "text/html")
+        msg.attach_file('dnow/static/dnow/files/DNOWSchedule2018.docx')
+        msg.send()
+        # send_mail(
+        #     subject,
+        #     msgPlain,
+        #     'dndmay1@gmail.com',
+        #     toList,
+        #     html_message=msgHtml,
+        #     auth_user='dndmay1@gmail.com',
+        #     auth_password=os.environ.get('GMP'),
+        # )
 
 
 def emailAllDrivers(debug=False):
@@ -144,7 +162,7 @@ def emailCook(cook, debug=False):
     msgHtml = render_to_string('dnow/emailCooks.html', context=htmlContext)
 
     toList = [cook.email, 'ledeburs5@gmail.com']
-    subject = 'DNOW Weekend: Cooking Info - %s' % cook.lastName
+    subject = 'DNOW Weekend: Cooking Info - %s - Correction' % cook.lastName
     if debug:
         print('  To: ' + ', '.join(toList))
         print('  ' + subject + '\n\n')
@@ -194,7 +212,7 @@ def emailParent(student, debug=False):
     msgPlain = render_to_string('dnow/emailParents.txt', context=textContext)
     msgHtml = render_to_string('dnow/emailParents.html', context=htmlContext)
 
-    toList = [student.parentEmail]
+    toList = [student.parentEmail, 'lpannell@chaseoaks.org']
     subject = 'DNOW Weekend: Details for student - %s %s' % (student.firstName, student.lastName)
     if debug:
         print('  To: ' + ', '.join(toList))
@@ -213,15 +231,6 @@ def emailParent(student, debug=False):
             msg.attach_file('dnow/static/dnow/files/66763.pdf')
             msg.attach_file('dnow/static/dnow/files/66764.pdf')
         msg.send()
-        # send_mail(
-        #     subject,
-        #     msgPlain,
-        #     'dndmay1@gmail.com',
-        #     toList,
-        #     html_message=msgHtml,
-        #     auth_user='dndmay1@gmail.com',
-        #     auth_password=os.environ.get('GMP'),
-        # )
 
 
 def emailAllParents(debug=False):

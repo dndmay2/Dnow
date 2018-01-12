@@ -343,7 +343,7 @@ class ReadSpreadsheet:
                 hh.street = readCell(row, col=HOST_COLUMNS['Address'])
                 hh.city = readCell(row, col=HOST_COLUMNS['City'])
                 hh.state = readCell(row, col=HOST_COLUMNS['State'])
-                hh.zip = readCell(row, col=HOST_COLUMNS['Zip'])
+                hh.zipCode = readCell(row, col=HOST_COLUMNS['Zip'])
                 hh.bgCheck = getBoolean(readCell(row, col=HOST_COLUMNS['Background Check?']))
                 hh.tshirtSize = getShirtSize(readCell(row, col=HOST_COLUMNS['T-Shirt Size']))
                 hh.allergy = getAllergy(readCell(row, col=HOST_COLUMNS['Allergy']))

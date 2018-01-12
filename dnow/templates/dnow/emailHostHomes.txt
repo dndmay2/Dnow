@@ -1,5 +1,7 @@
-Dear {{ hostHome.lastName }} family,
-Thank you for hosting students this year. The DNOW weekend is January 12-14, 2018.
+Dear {{ hostHome.lastName }} family and leaders,
+Thank you for hosting and leading students this year. We couldn't do this weekend without you. If you have any needs, please
+don't hesitate to let us know. We hope to see you Wednesday January 10th at 7pm at the Student Building at Chase Oaks
+Sloan Creek campus to get an overview of the weekend. The DNOW weekend is January 12-14, 2018.
 You will be hosting {{ studentCount }} {{ hostHome.grade }}th grade {{ gender }} and {{ leaderCount }} leaders.
 
 Your meals will be provided by:

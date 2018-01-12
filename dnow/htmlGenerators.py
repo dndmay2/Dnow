@@ -441,7 +441,8 @@ class HostHomeData(object):
         self.baseText = generateHostHomeText(self.hh)
 
     def genPrevNextHtmlIndices(self):
-        hostHomeList = HostHome.objects.order_by('lastName')
+        # hostHomeList = HostHome.objects.order_by('lastName')
+        hostHomeList = HostHome.objects.exclude(grade__contains='?').order_by('lastName')
         self.hostHomeIdList, self.prevIndx, self.nextIndx = genPrevNextFromIdList(hostHomeList, self.hh.id)
 
     def genStudentData(self):
