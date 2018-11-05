@@ -99,16 +99,27 @@ def generateAllStudentHtmlTable():
     table = [['Name', 'Gender', 'Grade', 'Host Home', 'Matched Friends', 'Unmatched Friends', 'Why' ]]
     friendDict = checkStudentFriendMatchups()
     for student in studentList:
+        print('DEREK', student)
         row = ['%s %s' % (student.firstName, student.lastName)]
         row.append(student.gender)
         row.append(student.grade)
-        row.append(student.hostHome.lastName)
-        row.append(friendDict[student][0])
-        row.append(friendDict[student][1])
-        if 'not registered' in friendDict[student][2]:
-            row.append('<span style="color:green">%s</span>' % friendDict[student][2])
-        else:
-            row.append('<span style="color:red">%s</span>' % friendDict[student][2])
+        try:
+            row.append(student.hostHome.lastName)
+        except:
+            row.append('none')
+        try:
+            row.append(friendDict[student][0])
+        except:
+            row.append('none')
+        try:
+            row.append(friendDict[student][1])
+        except:
+            row.append('none')
+        if student in friendDict:
+            if 'not registered' in friendDict[student][2]:
+                row.append('<span style="color:green">%s</span>' % friendDict[student][2])
+            else:
+                row.append('<span style="color:red">%s</span>' % friendDict[student][2])
         table.append(row)
     html = tabulate(table[1:], headers=table[0], tablefmt='html')
     return html
@@ -360,7 +371,8 @@ def generateDriveSlotTable(driver, dest='html'):
     driveSlots = driver.driveslot_set.all().order_by('time')
     table = [['Time', 'Host Home']]
     for ds in driveSlots:
-        row = [ds.time]
+        time = ds.time[2:]
+        row = [time]
         if dest == 'html':
             hhHref = '<a href="%s">%s</a>' % (reverse('hosthome', args=[ds.hostHome.id]), ds.hostHome.lastName)
             row.append(hhHref)

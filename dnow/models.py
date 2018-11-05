@@ -76,6 +76,7 @@ class HostHome(Contact):
     bgCheck = models.BooleanField(default=False)
     tshirtSize = models.CharField(max_length=16, choices=SHIRT_SIZES, default='M')
     allergy = models.CharField(max_length=80, default='')
+    color = models.CharField(max_length=20, default='')
 
     def __str__(self):
         return '%s, %s %s' % (self.lastName, self.grade, self.gender)

@@ -9,6 +9,7 @@ from oauth2client.file import Storage
 from dateutil.parser import parse
 from django.db import DataError
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
 
 from dnow.models import *
 import dnow.config as config
@@ -61,7 +62,7 @@ def getCredentials():
     store = Storage(credential_path)
     credentials = store.get()
     if not credentials or credentials.invalid:
-        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
+        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES, login_hint=settings.SPREADSHEET_GOOGLE_ACCOUNT)
         flow.user_agent = APPLICATION_NAME
         flags = tools.argparser.parse_args(args=[])
         if flags:
@@ -347,6 +348,7 @@ class ReadSpreadsheet:
                 hh.bgCheck = getBoolean(readCell(row, col=HOST_COLUMNS['Background Check?']))
                 hh.tshirtSize = getShirtSize(readCell(row, col=HOST_COLUMNS['T-Shirt Size']))
                 hh.allergy = getAllergy(readCell(row, col=HOST_COLUMNS['Allergy']))
+                hh.color = readCell(row, col=HOST_COLUMNS['Color'])
                 hh.save()
         except Exception as e:
             printLog('Error with hosthome row: %s %s' % (row, e))

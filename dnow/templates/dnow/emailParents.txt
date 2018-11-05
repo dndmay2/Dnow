@@ -1,4 +1,18 @@
 Dear parent of {{ student.firstName }} {{ student.lastName }},
+NEW INFORMATION:
+Check-in is in the gym at Cottonwood Creek. Each host home is associated with a color. The {{ hostHome.lastName }} host home
+color is {{ hostHome.color }}. Look for this color and this is where your kid's luggage will be kept during the rally.
+This will also be the meeting point for the students, drivers and leaders after the rally.
+
+{% if student.medicalForm %}
+-
+{% else %}
+We are still missing your medical forms or part of your medical forms. The liability form has two sides and both
+must be filled out. Laura's email address was wrong in our last email. Please use: lpannell@chaseoaks.org.
+{% endif %}
+
+Original Email Details:
+
 The DNOW weekend starts this Friday (January 12-14, 2018).
 Your student will be staying at the {{ hostHome.lastName }} host home.
 Please arrive at Cottonwood Creek Church between 5:30-6:30PM to checkin.
@@ -15,7 +29,7 @@ IMPORTANT: Information needed
     {% if student.medicalForm %}
     2. We show that you have turned in your medical form. Thank you.
     {% else %}
-    2. MEDICAL FORMS MISSING!!! Please send your medical release forms (attached) to lpanell@chaseoaks.org.
+    2. MEDICAL FORMS MISSING!!! Please send your medical release forms (attached) to lpannell@chaseoaks.org (CORRECTED EMAIL!!).
     {% endif %}
 {{ hostHomeBaseHtml|safe }}
 What To Bring

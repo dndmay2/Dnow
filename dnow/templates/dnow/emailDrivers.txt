@@ -1,6 +1,10 @@
 Dear {{ driver.firstName }},
-Thank you for driving students this year. The DNOW weekend is January 12-14, 2018.
-We have your available car capacity at {{ driver.carCapacity }}. If this is not correct, please let us know.
+For some of you, your driving information has changed slightly. Please review below.
+
+Check-in is in the gym at Cottonwood Creek. Drivers (who are not leaders) please arrive by 8:45PM.
+You will be given further instruction at that time.
+
+You guys are awesome! Thank you for giving up a large part of your weekend to allow this event to be successful.
 
 You will be driving at the following times and locations:
 Drive Times

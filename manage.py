@@ -27,7 +27,7 @@ def read_env():
             os.environ.setdefault(key, val)
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "churchsite.settings.production")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "churchsite.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError:
