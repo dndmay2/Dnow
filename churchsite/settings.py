@@ -150,14 +150,14 @@ DATABASES = {
 }
 
 # EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = config('EMAIL_FILE_PATH')
-EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_PORT = config('EMAIL_PORT', cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS')
+EMAIL_FILE_PATH = config('EMAIL_FILE_PATH', default='/tmp/dnow')
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='nopassword')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='nouser')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 # EMAIL_USE_SSL = True
 EMAIL_SUBJECT_PREFIX = '[DNOW Test] '
 
-SPREADSHEET_GOOGLE_ACCOUNT = config('SPREADSHEET_GOOGLE_ACCOUNT')
+SPREADSHEET_GOOGLE_ACCOUNT = config('SPREADSHEET_GOOGLE_ACCOUNT', default='nouser')
 
