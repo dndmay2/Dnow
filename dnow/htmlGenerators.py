@@ -99,7 +99,6 @@ def generateAllStudentHtmlTable():
     table = [['Name', 'Gender', 'Grade', 'Host Home', 'Matched Friends', 'Unmatched Friends', 'Why' ]]
     friendDict = checkStudentFriendMatchups()
     for student in studentList:
-        print('DEREK', student)
         row = ['%s %s' % (student.firstName, student.lastName)]
         row.append(student.gender)
         row.append(student.grade)

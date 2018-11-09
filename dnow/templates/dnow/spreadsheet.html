@@ -4,6 +4,16 @@
 
 {% block content %}
 <h1>Spreadsheet</h1>
+    <dl class="dl-horizontal">
+        <dt><b>Google Drive Email:</b></dt>
+        <dd>{{ request.user.profile.googleDriveEmail }}</dd>
+        <br>
+        <dt><b>You must share your spreadsheet with this email address:</b></dt>
+        <dd>dnowwebapp@dnow-1489468998741.iam.gserviceaccount.com</dd>
+        <br>
+        <dt><b>Google SpreadSheet (adjust in <a href="/dnow/settings/">Settings</a>):</b></dt>
+        <dd><a href="{{ request.user.profile.googleSpreadSheet }}">{{ request.user.profile.googleSpreadSheet }}</a></dd>
+    </dl>
 <form action="#" method="get" class="submit">
      <input type="submit" value="Read Spreadsheet" name="readSpreadsheet">
 </form>

@@ -1,11 +1,75 @@
 # Create your views here.
 from django.shortcuts import get_object_or_404, render
+from django.shortcuts import redirect
+from django.core.mail import mail_admins
+from django.contrib.auth.models import User
+from django.contrib import auth, messages
+from django.contrib.auth.decorators import login_required
 
 from Spreadsheet.ReadSpreadsheet import ReadSpreadsheet, checkStudentFriendMatchups
 from dnow.Email.SendEmail import *
 from dnow.htmlGenerators import *
-from .models import Student, Parent, HostHome, Driver, Cook, Leader
+from .models import Student, Parent, HostHome, Driver, Cook, Leader, Profile
+from .forms import SettingForm
 import config
+
+def profile(request):
+    #...
+    pass
+
+@login_required
+def settings(request):
+    user = get_object_or_404(User, id=request.user.id)
+    if request.method == 'POST':
+        f = SettingForm(request.POST, instance=user.profile)
+        if f.is_valid():
+            f.save()
+            messages.add_message(request, messages.INFO, 'Settings Saved.')
+            return redirect('/dnow/user_details/')
+
+    else:
+        f = SettingForm(instance=user.profile)
+
+    return render(request, 'dnow/settings.html', {'form': f})
+
+
+def login(request):
+    if request.user.is_authenticated():
+        return redirect('/admin/')
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = auth.authenticate(username=username, password=password)
+
+        if user is not None:
+            # correct username and password login the user
+            auth.login(request, user)
+            try:
+                if hasattr(user, 'profile') and user.profile is not None:
+                    print('found profile', user.profile)
+                else:
+                    Profile.objects.create(user=user, googleSpreadSheet='googleSpreadSheet', church='campus', googleDriveEmail='me@gmail.com')
+                    print('failed if')
+                    Profile.objects.create(user=user, googleSpreadSheet='googleSpreadSheet', church='campus', googleDriveEmail='me@gmail.com')
+            except Exception:
+                print('did not find profile')
+            return redirect('/dnow/')
+
+        else:
+            messages.error(request, 'Error wrong username/password')
+
+    return render(request, 'dnow/login.html')
+
+
+def logout(request):
+    auth.logout(request)
+    return render(request,'dnow/logout.html')
+
+
+def user_details(request):
+    user = get_object_or_404(User, id=request.user.id)
+    return render(request, 'dnow/user_details.html', {'user': user})
 
 
 def index(request):
@@ -121,7 +185,7 @@ def all_leaders(request):
 
 def spreadsheet(request):
     if request.GET.get('readSpreadsheet'):
-        ss = ReadSpreadsheet()
+        ss = ReadSpreadsheet(request.user)
         ss.readHosts()
         ss.readStudents()
         ss.readCooks()

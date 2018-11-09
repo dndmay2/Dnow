@@ -21,4 +21,9 @@ urlpatterns = [
     url(r'^driver/(?P<driver_id>[0-9]+)/$', views.driver, name='driver'),
     url(r'^cook/(?P<cook_id>[0-9]+)/$', views.cook, name='cook'),
     url(r'^leader/(?P<leader_id>[0-9]+)/$', views.leader, name='leader'),
+    # url('^contact/$', views.contact, name='contact'),
+    url(r'^login/$', views.login, name='login'),
+    url(r'^logout/$', views.logout, name='logout'),
+    url(r'^user_details/$', views.user_details, name='user_details'),
+    url('^settings/$', views.settings, name='settings'),
 ]

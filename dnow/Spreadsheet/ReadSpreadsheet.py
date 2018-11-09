@@ -3,6 +3,7 @@ import httplib2
 import os
 import sys
 from apiclient import discovery
+import json
 from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
@@ -10,16 +11,21 @@ from dateutil.parser import parse
 from django.db import DataError
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
+from google.oauth2 import service_account
 
 from dnow.models import *
-import dnow.config as config
+import dnow.config
+from decouple import config
 
 # https://developers.google.com/sheets/api/quickstart/python
 
 # If modifying these scopes, delete your previously saved credentials
 # at ~/.credentials/sheets.googleapis.com-python-quickstart.json
+# Using a service account:
+# https://medium.com/@denisluiz/python-with-google-sheets-service-account-step-by-step-8f74c26ed28e
 SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
 CLIENT_SECRET_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'client_secret.json')
+CLIENT_SECRET = config('CLIENT_SECRET')
 APPLICATION_NAME = 'Google Sheets API Python Quickstart'
 STUDENT_COLUMNS = {}
 HOST_COLUMNS = {}
@@ -31,7 +37,7 @@ MEAL2 = 'Sat Dinner - 5:00PM'
 
 def printLog(s):
     print(s)
-    config.SPREADSHEET_LOG += s + '\n'
+    dnow.config.SPREADSHEET_LOG += s + '\n'
 
 
 def colToNum(colStr):
@@ -44,7 +50,7 @@ def colToNum(colStr):
     return col_num - 1
 
 
-def getCredentials():
+def getCredentials(user):
     """Gets valid user credentials from storage.
 
     If nothing has been stored, or if the stored credentials are invalid,
@@ -58,11 +64,12 @@ def getCredentials():
     if not os.path.exists(credential_dir):
         os.makedirs(credential_dir)
     credential_path = os.path.join(credential_dir, 'sheets.googleapis.com-python-quickstart.json')
+    os.remove(credential_path)
 
     store = Storage(credential_path)
     credentials = store.get()
     if not credentials or credentials.invalid:
-        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES, login_hint=settings.SPREADSHEET_GOOGLE_ACCOUNT)
+        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES, login_hint=user.profile.googleDriveEmail)
         flow.user_agent = APPLICATION_NAME
         flags = tools.argparser.parse_args(args=[])
         if flags:
@@ -215,23 +222,37 @@ def checkStudentFriendMatchups():
     return friendDict
 
 class ReadSpreadsheet:
-    def __init__(self):
+    def __init__(self, user):
         """Shows basic usage of the Sheets API.
 
         Creates a Sheets API service object and prints the names and majors of
         students in a sample spreadsheet:
         https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
         """
-        config.SPREADSHEET_LOG = ''
-        self.credentials = getCredentials()
-        self.http = self.credentials.authorize(httplib2.Http())
-        discoveryUrl = 'https://sheets.googleapis.com/$discovery/rest?' 'version=v4'
-        self.service = discovery.build('sheets', 'v4', http=self.http, discoveryServiceUrl=discoveryUrl)
+        dnow.config.SPREADSHEET_LOG = ''
+        self.user = user
+        self.parseSpreadSheetUrl()
+
+        # OLD
+        # self.credentials = getCredentials(user)
+        # self.http = self.credentials.authorize(httplib2.Http())
+        # discoveryUrl = 'https://sheets.googleapis.com/$discovery/rest?' 'version=v4'
+        # self.service = discovery.build('sheets', 'v4', http=self.http, discoveryServiceUrl=discoveryUrl)
+
+        # NEW
+        scopes = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/drive.file",
+                  "https://www.googleapis.com/auth/spreadsheets"]
+        # secret_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'client_secret.json')
+        secret_file = json.loads(CLIENT_SECRET)
+
+        # credentials = service_account.Credentials.from_service_account_file(secret_file, scopes=scopes)
+        credentials = service_account.Credentials.from_service_account_info(secret_file)
+        self.service = discovery.build('sheets', 'v4', credentials=credentials.with_scopes(scopes))
 
         # DNOW: https://docs.google.com/spreadsheets/d/1xb4sfQUGaCT9uDsxhovFl6MCiCR-1AuDPuAj9wJgrcU/edit#gid=0
         # self.spreadsheetId = '1xb4sfQUGaCT9uDsxhovFl6MCiCR-1AuDPuAj9wJgrcU'
         # 2018 DNOW spreadsheet: https://docs.google.com/spreadsheets/d/1pknbr9iBFb-9e-Lt5wiwa74TWl9mJu6d4jVkHtJPV6E/edit#gid=1940584643
-        self.spreadsheetId = '1pknbr9iBFb-9e-Lt5wiwa74TWl9mJu6d4jVkHtJPV6E'
+        # self.spreadsheetId = '1pknbr9iBFb-9e-Lt5wiwa74TWl9mJu6d4jVkHtJPV6E'
         self.hostLastName = self.hostFirstName = self.hostGrade = self.hostGender = self.hostPhone = None
         self.hostEmail = self.hostAddress = self.hostBgCheck = None
         self.cleanup()
@@ -239,6 +260,23 @@ class ReadSpreadsheet:
     def cleanup(self):
         Meal.objects.all().delete()
         DriveSlot.objects.all().delete()
+
+    def parseSpreadSheetUrl(self):
+        """
+        https://docs.google.com/spreadsheets/d/1pknbr9iBFb-9e-Lt5wiwa74TWl9mJu6d4jVkHtJPV6E/edit#gid=1940584643
+        :return: 1pknbr9iBFb-9e-Lt5wiwa74TWl9mJu6d4jVkHtJPV6E
+        """
+        urlPath = self.user.profile.googleSpreadSheet
+        parts = urlPath.split('/')
+        if len(parts) >= 6 and (parts[0] == 'https:' or parts[0] == 'http:'):
+            self.spreadsheetId = parts[5]
+        elif len(parts) >= 4 and parts[0] == 'docs.google.com':
+            self.spreadsheetId = parts[3]
+        else:
+            self.spreadsheetId = None
+            printLog('**ERROR: Not a valid Google Spreadsheet path: %s' % urlPath)
+        printLog('spreadSheetId = %s' % self.spreadsheetId)
+
 
     def getRangeValues(self, rangeName):
         result = self.service.spreadsheets().values().get(spreadsheetId=self.spreadsheetId, range=rangeName).execute()

@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from localflavor.us import models as usmodels
+from django.contrib.auth.models import User
 
 GRADE_CHOICES = (
     ('?', '?'),
@@ -31,6 +32,12 @@ DRIVE_SLOTS = (
     ('driveSlot5', '5 Sat, 8:50-9:30 pm'),
     ('driveSlot6', '6 Sun, 8:20-8:45 am'),
 )
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    googleSpreadSheet = models.TextField(max_length=500, blank=True)
+    church = models.CharField(max_length=30, blank=True)
+    googleDriveEmail = models.CharField(max_length=30, blank=True)
 
 
 # Create your models here.
