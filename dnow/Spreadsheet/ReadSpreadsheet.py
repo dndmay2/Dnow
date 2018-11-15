@@ -4,6 +4,7 @@ import os
 import sys
 from apiclient import discovery
 import json
+import simplejson
 from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
@@ -248,7 +249,7 @@ class ReadSpreadsheet:
                   "https://www.googleapis.com/auth/spreadsheets"]
         # secret_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'client_secret.json')
         print(CLIENT_SECRET[:50], CLIENT_SECRET[-50:])
-        secret_file = json.loads(CLIENT_SECRET)
+        secret_file = simplejson.loads(CLIENT_SECRET)
 
         # credentials = service_account.Credentials.from_service_account_file(secret_file, scopes=scopes)
         credentials = service_account.Credentials.from_service_account_info(secret_file)

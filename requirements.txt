@@ -16,6 +16,7 @@ python-dateutil==2.7.5
 python-decouple==3.1
 pytz==2018.7
 rsa==3.4.2
+simplejson==3.16.0
 six==1.11.0
 tabulate==0.8.2
 uritemplate==3.0.0
