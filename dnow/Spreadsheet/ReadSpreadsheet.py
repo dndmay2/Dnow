@@ -111,6 +111,7 @@ def getGender(gender):
 
 def getShirtSize(size):
     size = size.lower()
+    size = size.replace('adult ', '')
     if size in ['m', 'med', 'medium']:
         return 'M'
     elif size in ['l', 'large', 'lrg', 'lrge']:
@@ -143,7 +144,10 @@ def getBoolean(val):
 
 
 def getDate(val):
-    date = parse(val)
+    try:
+        date = parse(val)
+    except ValueError:
+        date = '1999-01-01'
     return date
 
 
@@ -255,6 +259,7 @@ class ReadSpreadsheet:
         # self.spreadsheetId = '1pknbr9iBFb-9e-Lt5wiwa74TWl9mJu6d4jVkHtJPV6E'
         self.hostLastName = self.hostFirstName = self.hostGrade = self.hostGender = self.hostPhone = None
         self.hostEmail = self.hostAddress = self.hostBgCheck = None
+        self.currentColumn = self.currentTable = None
         self.cleanup()
 
     def cleanup(self):
@@ -316,29 +321,45 @@ class ReadSpreadsheet:
                 DRIVER_COLUMNS[c] = colNum
             colNum += 1
 
+    def getColNum(self, table, col):
+        if table == 'students':
+            colNum = STUDENT_COLUMNS[col]
+        elif table == 'hosts':
+            colNum = HOST_COLUMNS[col]
+        elif table == 'cooks':
+            colNum = COOK_COLUMNS[col]
+        elif table == 'leaders':
+            colNum = LEADER_COLUMNS[col]
+        elif table == 'drivers':
+            colNum = DRIVER_COLUMNS[col]
+        self.currentColumn = col
+        self.currentTable = table
+        return colNum
+
     def readStudentRow(self, row):
         try:
-            studentLastName = readCell(row, col=STUDENT_COLUMNS['Student Last Name'])
-            studentFirstName = readCell(row, col=STUDENT_COLUMNS['Student First Name'])
+            studentLastName = readCell(row, col=self.getColNum('students', 'Student Last Name'))
+            if studentLastName == 'Byland':
+                pass
+            studentFirstName = readCell(row, col=self.getColNum('students', 'Student First Name'))
             if (studentFirstName and studentFirstName != 'NA') or (studentLastName and studentLastName != 'NA'):
                 s = Student(firstName=studentFirstName, lastName=studentLastName)
-                s.grade = getGrade(readCell(row, col=STUDENT_COLUMNS['Student Grade']))
-                s.gender = getGender(readCell(row, col=STUDENT_COLUMNS['Student Gender']))
-                s.phone = readCell(row, col=STUDENT_COLUMNS['Student Cell Number'])
-                s.street = readCell(row, col=STUDENT_COLUMNS['Address'])
-                s.city = readCell(row, col=STUDENT_COLUMNS['City'])
-                s.state = readCell(row, col=STUDENT_COLUMNS['State'])
-                s.zip = readCell(row, col=STUDENT_COLUMNS['Zip'])
-                s.medicalForm = getBoolean(readCell(row, col=STUDENT_COLUMNS['Med Release']))
-                s.dateRegistered = getDate(readCell(row, col=STUDENT_COLUMNS['Date Entered']))
-                s.amountPaid = getMoney(readCell(row, col=STUDENT_COLUMNS['Amount']))
-                # s.churchMember = getBoolean(readCell(row, col=STUDENT_COLUMNS['']))
-                s.tshirtSize = getShirtSize(readCell(row, col=STUDENT_COLUMNS['Student T-shirt Size (adult)']))
-                s.friendName = readCell(row, col=STUDENT_COLUMNS['Friend'])
-                s.parentPhone = readCell(row, col=STUDENT_COLUMNS['Parent Cell Number'])
-                s.parentEmail = readCell(row, col=STUDENT_COLUMNS['Parent Email'])
-                s.allergy = getAllergy(readCell(row, col=STUDENT_COLUMNS['Allergy']))
-                hostHome = readCell(row, col=STUDENT_COLUMNS['Host Home'])
+                s.grade = getGrade(readCell(row, col=self.getColNum('students', 'Student Grade')))
+                s.gender = getGender(readCell(row, col=self.getColNum('students', 'Student Gender')))
+                s.phone = readCell(row, col=self.getColNum('students', 'Student Cell #'))
+                s.street = readCell(row, col=self.getColNum('students', 'Address'))
+                s.city = readCell(row, col=self.getColNum('students', 'City'))
+                s.state = readCell(row, col=self.getColNum('students', 'State'))
+                s.zip = readCell(row, col=self.getColNum('students', 'Zip'))
+                s.medicalForm = getBoolean(readCell(row, col=self.getColNum('students', 'Waiver')))
+                s.dateRegistered = getDate(readCell(row, col=self.getColNum('students', 'Date Entered')))
+                s.amountPaid = getMoney(readCell(row, col=self.getColNum('students', 'Amount')))
+                s.tshirtSize = getShirtSize(readCell(row, col=self.getColNum('students', 'Student T-Shirt Size')))
+                s.friendName = readCell(row, col=self.getColNum('students', 'Friend'))
+                s.parentPhone = readCell(row, col=self.getColNum('students', 'Parent Cell #'))[:20]
+                s.parentEmail = readCell(row, col=self.getColNum('students', 'Parent Email'))
+                s.allergy = getAllergy(readCell(row, col=self.getColNum('students', 'Allergy')))
+                hostHome = readCell(row, col=self.getColNum('students', 'Host Home'))
                 if hostHome:
                     try:
                         hhObj = HostHome.objects.get(lastName=hostHome)
@@ -347,7 +368,7 @@ class ReadSpreadsheet:
                         printLog('No host home for %s %s: .%s.' % (studentFirstName, studentLastName, hostHome))
                 s.save()
         except Exception as e:
-            printLog('Error with student row: %s %s' % (row, e))
+            printLog('Error with student row: %s\n    %s = %s' % (row, self.currentColumn, e))
             print(sys.exc_info())
 
     def readHosts(self):

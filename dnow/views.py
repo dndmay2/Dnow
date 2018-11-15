@@ -35,7 +35,7 @@ def settings(request):
 
 def login(request):
     if request.user.is_authenticated():
-        return redirect('/admin/')
+        return redirect('/dnow/user_details/')
 
     if request.method == 'POST':
         username = request.POST.get('username')
