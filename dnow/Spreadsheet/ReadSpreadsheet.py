@@ -247,6 +247,7 @@ class ReadSpreadsheet:
         scopes = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/drive.file",
                   "https://www.googleapis.com/auth/spreadsheets"]
         # secret_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'client_secret.json')
+        print(CLIENT_SECRET[:50], CLIENT_SECRET[-50:])
         secret_file = json.loads(CLIENT_SECRET)
 
         # credentials = service_account.Credentials.from_service_account_file(secret_file, scopes=scopes)
