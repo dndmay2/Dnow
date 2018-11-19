@@ -59,7 +59,7 @@ def emailHostHome(hh, debug=False):
         )
 
 
-def emailAllHostHomes(debug=False):
+def emailAllHostHomes(user, debug=True):
     hostHomesList = HostHome.objects.exclude(grade__contains='?').order_by('lastName')
     for hh in hostHomesList:
         if hh.student_set.count() > 0:
@@ -124,7 +124,7 @@ def emailDriver(driver, debug=False):
         # )
 
 
-def emailAllDrivers(debug=False):
+def emailAllDrivers(user, debug=True):
     driverList = Driver.objects.order_by('lastName')
     for driver in driverList:
         if driver.driveslot_set.count() > 0:
@@ -182,7 +182,7 @@ def emailCook(cook, debug=False):
         )
 
 
-def emailAllCooks(debug=False):
+def emailAllCooks(user, debug=True):
     cookList = Cook.objects.order_by('lastName')
     for cook in cookList:
         if cook.meal_set.count() > 0:
@@ -235,7 +235,7 @@ def emailParent(student, debug=False):
         msg.send()
 
 
-def emailAllParents(debug=False):
+def emailAllParents(user, debug=True):
     studentList = Student.objects.order_by('lastName')
     # start = False # Needed when failed in middle of job
     start = True

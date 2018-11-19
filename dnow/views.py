@@ -73,7 +73,8 @@ def user_details(request):
 
 
 def index(request):
-    studentTable = generateAllStudentHtmlTable()
+    user = request.user
+    studentTable = generateAllStudentHtmlTable(user)
     context = {
         'studentTable': studentTable,
     }
@@ -88,9 +89,10 @@ def parent(request, parent_id):
 
 def driver(request, driver_id):
     # type: (object, object) -> object
+    user = request.user
     driver = get_object_or_404(Driver, pk=driver_id)
     dsHtml, dsText = generateDriveSlotHtml(driver, dest='html')
-    driverList = Driver.objects.order_by('lastName')
+    driverList = Driver.objects.filter(user=user).order_by('lastName')
     idList, prevIndx, nextIndx = genPrevNextFromIdList(driverList, driver.id)
     hostHomes = { ds.hostHome for ds in driver.driveslot_set.all() }
     hhHtml = ''
@@ -114,8 +116,9 @@ def cook(request, cook_id):
 
 def leader(request, leader_id):
     # type: (object, object) -> object
+    user = request.user
     leader = get_object_or_404(Leader, pk=leader_id)
-    leaderList = Leader.objects.order_by('lastName')
+    leaderList = Leader.objects.filter(user=user).order_by('lastName')
     idList, prevIndx, nextIndx = genPrevNextFromIdList(leaderList, leader.id)
     context = {
         'leader': leader,
@@ -127,8 +130,9 @@ def leader(request, leader_id):
 
 def student(request, student_id):
     # type: (object, object) -> object
+    user = request.user
     s = get_object_or_404(Student, pk=student_id)
-    studentList = Student.objects.order_by('gender', 'grade', 'lastName')
+    studentList = Student.objects.filter(user=user).filter(user=user).order_by('gender', 'grade', 'lastName')
     studentIdList, prevIndx, nextIndx = genPrevNextFromIdList(studentList, s.id)
 
     context = {
@@ -142,13 +146,13 @@ def student(request, student_id):
 def hosthome(request, hosthome_id):
     # type: (object, object) -> object
     hh = get_object_or_404(HostHome, pk=hosthome_id)
-    hhData = HostHomeData(hh, dest='html')
+    hhData = HostHomeData(hh, user=request.user, dest='html')
     context = hhData.getHtmlContext()
     return render(request, 'dnow/hosthome.html', context)
 
 
 def all_hosthomes(request):
-    hostHomeSummary = generateOverallSummaryHtml()
+    hostHomeSummary = generateOverallSummaryHtml(request.user)
     context = {
         'hostHomeSummary': hostHomeSummary,
     }
@@ -156,7 +160,8 @@ def all_hosthomes(request):
 
 
 def all_drivers(request):
-    driversList = Driver.objects.order_by('lastName')
+    user = request.user
+    driversList = Driver.objects.filter(user=user).order_by('lastName')
     seatCount = 0
     for d in driversList:
         seatCount = seatCount + d.carCapacity
@@ -168,7 +173,8 @@ def all_drivers(request):
 
 
 def all_cooks(request):
-    cooksList = Cook.objects.order_by('lastName')
+    user = request.user
+    cooksList = Cook.objects.filter(user=user).order_by('lastName')
     context = {
         'cooksList': cooksList,
     }
@@ -176,7 +182,8 @@ def all_cooks(request):
 
 
 def all_leaders(request):
-    leadersList = Leader.objects.order_by('lastName')
+    user = request.user
+    leadersList = Leader.objects.filter(user=user).order_by('lastName')
     context = {
         'leadersList': leadersList,
     }
@@ -203,8 +210,8 @@ def viewSpreadSheetLog(request):
 def email(request):
     if request.GET.get('emailHostHomes'):
         print('emailHostHomes was pressed')
-        emailAllHostHomes()
+        emailAllHostHomes(request.user)
     elif request.GET.get('emailDrivers'):
         print('emailDrivers was pressed')
-        emailAllDrivers()
+        emailAllDrivers(request.user)
     return render(request, 'dnow/emailPage.html')

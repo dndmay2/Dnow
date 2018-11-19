@@ -94,10 +94,10 @@ def generateLeadersHtml(hostHome):
     return html, text
 
 
-def generateAllStudentHtmlTable():
-    studentList = Student.objects.order_by('hostHome__lastName', 'grade', 'lastName')
+def generateAllStudentHtmlTable(user):
+    studentList = Student.objects.filter(user=user).order_by('hostHome__lastName', 'grade', 'lastName')
     table = [['Name', 'Gender', 'Grade', 'Host Home', 'Matched Friends', 'Unmatched Friends', 'Why' ]]
-    friendDict = checkStudentFriendMatchups()
+    friendDict = checkStudentFriendMatchups(user)
     for student in studentList:
         row = ['%s %s' % (student.firstName, student.lastName)]
         row.append(student.gender)
@@ -238,8 +238,8 @@ def generateDriverDetailsTable(hostHome, dest='html'):
     return driverTable
 
 
-def generateOverallSummaryHtml():
-    hostHomesList = HostHome.objects.exclude(grade__contains='?').order_by('lastName')
+def generateOverallSummaryHtml(user):
+    hostHomesList = HostHome.objects.filter(user=user).exclude(grade__contains='?').order_by('lastName')
     html = '<table sumary="Host Home Summary Table">'
     html += '<tr>'
     html += '<th>Host</th>'
@@ -344,8 +344,8 @@ def generateHostHomeText(hostHome, driver=False):
     return hhBaseText
 
 
-def generateChurchStaffTable(dest='html'):
-    staffList = Leader.objects.order_by('lastName').filter(churchStaff=True)
+def generateChurchStaffTable(user, dest='html'):
+    staffList = Leader.objects.filter(user=user).order_by('lastName').filter(churchStaff=True)
     table = [['Name', 'Phone', 'Email']]
     for leader in staffList:
         row = ['%s %s' % (leader.firstName, leader.lastName)]
@@ -359,8 +359,8 @@ def generateChurchStaffTable(dest='html'):
     return table
 
 
-def generateChurchStaffHtml(dest='html'):
-    data = generateChurchStaffTable(dest=dest)
+def generateChurchStaffHtml(user, dest='html'):
+    data = generateChurchStaffTable(user, dest=dest)
     html = tabulate(data[1:], headers=data[0], tablefmt='html')
     text = tabulate(data[1:], headers=data[0], tablefmt='grid')
     return html, text
@@ -416,9 +416,10 @@ def genAllergySummaryString(hostHome):
 
 
 class HostHomeData(object):
-    def __init__(self, hh, dest='html'):
+    def __init__(self, hh, user, dest='html'):
         self.hh = hh
         self.dest = dest
+        self.user = user
         self.gender = None
         self.baseHtml = self.baseText = None
         self.studentHtml = self.studentText = None
@@ -453,7 +454,7 @@ class HostHomeData(object):
 
     def genPrevNextHtmlIndices(self):
         # hostHomeList = HostHome.objects.order_by('lastName')
-        hostHomeList = HostHome.objects.exclude(grade__contains='?').order_by('lastName')
+        hostHomeList = HostHome.objects.filter(user=self.user).exclude(grade__contains='?').order_by('lastName')
         self.hostHomeIdList, self.prevIndx, self.nextIndx = genPrevNextFromIdList(hostHomeList, self.hh.id)
 
     def genStudentData(self):
@@ -474,7 +475,7 @@ class HostHomeData(object):
         self.tshirtHtml, self.tshirtText = generateShirtSizesHtml(self.hh)
 
     def genChurchStaffData(self):
-        self.churchStaffHtml, self.churchStaffText = generateChurchStaffHtml(dest=self.dest)
+        self.churchStaffHtml, self.churchStaffText = generateChurchStaffHtml(self.user, dest=self.dest)
 
     def getGender(self):
         if self.hh.gender == 'F':

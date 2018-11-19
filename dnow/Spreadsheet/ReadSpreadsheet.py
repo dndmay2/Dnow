@@ -195,9 +195,9 @@ def checkFriendAgainstSet(friends, students):
     return yes, no
 
 
-def checkStudentFriendMatchups():
-    hostHomesList = HostHome.objects.exclude(grade__contains='?').order_by('lastName')
-    allStudents = Student.objects.all()
+def checkStudentFriendMatchups(user):
+    hostHomesList = HostHome.objects.exclude(grade__contains='?').filter(user=user).order_by('lastName')
+    allStudents = Student.objects.filter(user=user).all()
     friendDict = {}
     for hh in hostHomesList:
     # for hh in [hostHomesList.first()]:
@@ -248,7 +248,7 @@ class ReadSpreadsheet:
         scopes = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/drive.file",
                   "https://www.googleapis.com/auth/spreadsheets"]
         # secret_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'client_secret.json')
-        print(CLIENT_SECRET[:50], CLIENT_SECRET[-50:])
+        print(CLIENT_SECRET[:50], CLIENT_SECRET[-50:], len(CLIENT_SECRET))
         secret_file = simplejson.loads(CLIENT_SECRET)
 
         # credentials = service_account.Credentials.from_service_account_file(secret_file, scopes=scopes)
@@ -265,8 +265,8 @@ class ReadSpreadsheet:
         self.cleanup()
 
     def cleanup(self):
-        Meal.objects.all().delete()
-        DriveSlot.objects.all().delete()
+        Meal.objects.filter(user=self.user).all().delete()
+        DriveSlot.objects.filter(user=self.user).all().delete()
 
     def parseSpreadSheetUrl(self):
         """
@@ -298,14 +298,14 @@ class ReadSpreadsheet:
         if not values:
             printLog('No data found.')
         else:
-            Student.objects.all().delete()
+            Student.objects.filter(user=self.user).all().delete()
             header = values[0]
             data = values[1:]
             self.readColumnHeaders(header, 'students')
             for row in data:
                 self.readStudentRow(row)
 
-        for obj in Student.objects.all():
+        for obj in Student.objects.filter(user=self.user).all():
             printLog('Student: %s' % obj)
 
     def readColumnHeaders(self, header, table):
@@ -361,10 +361,11 @@ class ReadSpreadsheet:
                 s.parentPhone = readCell(row, col=self.getColNum('students', 'Parent Cell #'))[:20]
                 s.parentEmail = readCell(row, col=self.getColNum('students', 'Parent Email'))
                 s.allergy = getAllergy(readCell(row, col=self.getColNum('students', 'Allergy')))
+                s.user = self.user
                 hostHome = readCell(row, col=self.getColNum('students', 'Host Home'))
                 if hostHome:
                     try:
-                        hhObj = HostHome.objects.get(lastName=hostHome)
+                        hhObj = HostHome.objects.filter(user=self.user).get(lastName=hostHome)
                         s.hostHome = hhObj
                     except:
                         printLog('No host home for %s %s: .%s.' % (studentFirstName, studentLastName, hostHome))
@@ -380,15 +381,15 @@ class ReadSpreadsheet:
         if not values:
             printLog('No data found.')
         else:
-            HostHome.objects.all().delete()
-            DriveSlot.objects.all().delete()
+            HostHome.objects.filter(user=self.user).all().delete()
+            DriveSlot.objects.filter(user=self.user).all().delete()
             header = values[0]
             data = values[1:]
             self.readColumnHeaders(header, 'hosts')
             for row in data:
                 self.readHostRow(row)
 
-        for obj in HostHome.objects.all():
+        for obj in HostHome.objects.filter(user=self.user).all():
             printLog('Host Home: %s' % obj)
 
     def readHostRow(self, row):
@@ -410,12 +411,14 @@ class ReadSpreadsheet:
                 hh.tshirtSize = getShirtSize(readCell(row, col=HOST_COLUMNS['T-Shirt Size']))
                 hh.allergy = getAllergy(readCell(row, col=HOST_COLUMNS['Allergy']))
                 hh.color = readCell(row, col=HOST_COLUMNS['Color'])
+                hh.user = self.user
                 hh.save()
         except Exception as e:
             printLog('Error with hosthome row: %s %s' % (row, e))
         if hh:
             for ds in DRIVE_SLOTS:
                 driveSlot = DriveSlot(hostHome=hh, time=ds[1])
+                driveSlot.user = self.user
                 driveSlot.save()
 
 
@@ -427,15 +430,15 @@ class ReadSpreadsheet:
         if not values:
             printLog('No data found.')
         else:
-            Cook.objects.all().delete()
-            Meal.objects.all().delete()
+            Cook.objects.filter(user=self.user).all().delete()
+            Meal.objects.filter(user=self.user).all().delete()
             header = values[0]
             data = values[1:]
             self.readColumnHeaders(header, 'cooks')
             for row in data:
                 self.readCookRow(row)
 
-        for obj in Cook.objects.all():
+        for obj in Cook.objects.filter(user=self.user).all():
             printLog('Cook: %s' % obj)
 
     def readCookRow(self, row):
@@ -448,11 +451,13 @@ class ReadSpreadsheet:
                 c.email = readCell(row, col=COOK_COLUMNS['Email'] )
                 meal1 = readCell(row, col=COOK_COLUMNS[MEAL1] )
                 hhObj1 = hhObj2 = False
+                c.user = self.user
                 c.save()
                 if meal1 != '' and meal1 != 'NA':
                     try:
-                        hhObj1 = HostHome.objects.get(lastName=meal1)
+                        hhObj1 = HostHome.objects.filter(user=self.user).get(lastName=meal1)
                         m = Meal(cook=c, time=MEAL1, hostHome=hhObj1)
+                        m.user = self.user
                         m.save()
                         printLog("Meal = %s" % m)
                     except Exception as e:
@@ -460,8 +465,9 @@ class ReadSpreadsheet:
                 meal2 = readCell(row, col=COOK_COLUMNS[MEAL2] )
                 if meal2 != '' and meal2 != 'NA':
                     try:
-                        hhObj2 = HostHome.objects.get(lastName=meal2)
+                        hhObj2 = HostHome.objects.filter(user=self.user).get(lastName=meal2)
                         m = Meal(cook=c, time=MEAL2, hostHome=hhObj2)
+                        m.user = self.user
                         m.save()
                         printLog("Meal = %s" % m)
                     except Exception as e:
@@ -479,14 +485,14 @@ class ReadSpreadsheet:
         if not values:
             printLog('No data found.')
         else:
-            Leader.objects.all().delete()
+            Leader.objects.filter(user=self.user).all().delete()
             header = values[0]
             data = values[1:]
             self.readColumnHeaders(header, 'leaders')
             for row in data:
                 self.readLeaderRow(row)
 
-        for obj in Leader.objects.all():
+        for obj in Leader.objects.filter(user=self.user).all():
             printLog('Leader: %s' % obj)
 
     def readLeaderRow(self, row):
@@ -507,10 +513,11 @@ class ReadSpreadsheet:
                         ldr.churchStaff = True
                     else:
                         try:
-                            hhObj = HostHome.objects.get(lastName=hostHome)
+                            hhObj = HostHome.objects.filter(user=self.user).get(lastName=hostHome)
                             ldr.hostHome = hhObj
                         except:
                             printLog('No host home for %s %s: .%s.' % (leaderFirstName, leaderLastName, hostHome))
+                ldr.user = self.user
                 ldr.save()
         except Exception as e:
             printLog('Error with leader row: %s %s' % (row, e))
@@ -523,14 +530,14 @@ class ReadSpreadsheet:
         if not values:
             printLog('No data found.')
         else:
-            Driver.objects.all().delete()
+            Driver.objects.filter(user=self.user).all().delete()
             header = values[0]
             data = values[1:]
             self.readColumnHeaders(header, 'drivers')
             for row in data:
                 self.readDriverRow(row)
 
-        for obj in Driver.objects.all():
+        for obj in Driver.objects.filter(user=self.user).all():
             printLog('Driver: %s' % obj)
 
     def readDriverRow(self, row):
@@ -549,12 +556,13 @@ class ReadSpreadsheet:
                     d.carCapacity = cc
                 d.tshirtSize = getShirtSize(readCell(row, col=DRIVER_COLUMNS['T-shirt']))
                 d.bgCheck = getBoolean(readCell(row, col=DRIVER_COLUMNS['Background Check?']))
+                d.user = self.user
                 d.save()
                 for ds in DRIVE_SLOTS:
                     time = ds[1]
                     hostHome = readCell(row, col=DRIVER_COLUMNS[time])
                     try:
-                        hhObj = HostHome.objects.get(lastName=hostHome)
+                        hhObj = HostHome.objects.filter(user=self.user).get(lastName=hostHome)
                         driveSlot = hhObj.driveslot_set.get(time=time)
                         driveSlot.drivers.add(d)
                     except ObjectDoesNotExist:

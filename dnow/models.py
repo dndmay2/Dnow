@@ -42,6 +42,7 @@ class Profile(models.Model):
 
 # Create your models here.
 class Contact(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     firstName = models.CharField(max_length=30, default='')
     lastName = models.CharField(max_length=30, default='')
     phone = usmodels.PhoneNumberField(default='')
@@ -129,6 +130,7 @@ class Cook(Contact):
 
 
 class Meal(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     hostHome = models.ForeignKey(HostHome, on_delete=models.CASCADE, null=True, blank=True)
     cook = models.ForeignKey(Cook, on_delete=models.CASCADE, null=True, blank=True)
     time = models.CharField(max_length=40, default='')
@@ -138,6 +140,7 @@ class Meal(models.Model):
 
 
 class DriveSlot(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     hostHome = models.ForeignKey(HostHome, on_delete=models.CASCADE, null=True, blank=True)
     drivers = models.ManyToManyField(Driver)
     # time = models.DateTimeField(null=True, blank=True)
