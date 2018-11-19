@@ -71,9 +71,11 @@ def user_details(request):
     user = get_object_or_404(User, id=request.user.id)
     return render(request, 'dnow/user_details.html', {'user': user})
 
-
+# @login_required
 def index(request):
     user = request.user
+    if not user.is_authenticated():
+        return redirect('/dnow/login/')
     studentTable = generateAllStudentHtmlTable(user)
     context = {
         'studentTable': studentTable,
@@ -87,6 +89,7 @@ def parent(request, parent_id):
     return render(request, 'dnow/parent.html', {'parent': p})
 
 
+@login_required
 def driver(request, driver_id):
     # type: (object, object) -> object
     user = request.user
@@ -108,12 +111,14 @@ def driver(request, driver_id):
     return render(request, 'dnow/driver.html', context)
 
 
+@login_required
 def cook(request, cook_id):
     # type: (object, object) -> object
     p = get_object_or_404(Cook, pk=cook_id)
     return render(request, 'dnow/cook.html', {'cook': p})
 
 
+@login_required
 def leader(request, leader_id):
     # type: (object, object) -> object
     user = request.user
@@ -128,6 +133,7 @@ def leader(request, leader_id):
     return render(request, 'dnow/leader.html', context)
 
 
+@login_required
 def student(request, student_id):
     # type: (object, object) -> object
     user = request.user
@@ -143,6 +149,7 @@ def student(request, student_id):
     return render(request, 'dnow/student.html', context)
 
 
+@login_required
 def hosthome(request, hosthome_id):
     # type: (object, object) -> object
     hh = get_object_or_404(HostHome, pk=hosthome_id)
@@ -151,6 +158,7 @@ def hosthome(request, hosthome_id):
     return render(request, 'dnow/hosthome.html', context)
 
 
+@login_required
 def all_hosthomes(request):
     hostHomeSummary = generateOverallSummaryHtml(request.user)
     context = {
@@ -159,6 +167,7 @@ def all_hosthomes(request):
     return render(request, 'dnow/all_hosthomes.html', context)
 
 
+@login_required
 def all_drivers(request):
     user = request.user
     driversList = Driver.objects.filter(user=user).order_by('lastName')
@@ -172,6 +181,7 @@ def all_drivers(request):
     return render(request, 'dnow/all_drivers.html', context)
 
 
+@login_required
 def all_cooks(request):
     user = request.user
     cooksList = Cook.objects.filter(user=user).order_by('lastName')
@@ -181,6 +191,7 @@ def all_cooks(request):
     return render(request, 'dnow/all_cooks.html', context)
 
 
+@login_required
 def all_leaders(request):
     user = request.user
     leadersList = Leader.objects.filter(user=user).order_by('lastName')
@@ -190,6 +201,7 @@ def all_leaders(request):
     return render(request, 'dnow/all_leaders.html', context)
 
 
+@login_required
 def spreadsheet(request):
     if request.GET.get('readSpreadsheet'):
         ss = ReadSpreadsheet(request.user)
@@ -201,12 +213,14 @@ def spreadsheet(request):
     return render(request, 'dnow/spreadsheet.html')
 
 
+@login_required
 def viewSpreadSheetLog(request):
     context = {
         'log': config.SPREADSHEET_LOG,
     }
     return render(request, 'dnow/spreadsheetLog.html', context)
 
+@login_required
 def email(request):
     if request.GET.get('emailHostHomes'):
         print('emailHostHomes was pressed')
