@@ -26,4 +26,5 @@ urlpatterns = [
     url(r'^logout/$', views.logout, name='logout'),
     url(r'^user_details/$', views.user_details, name='user_details'),
     url('^settings/$', views.settings, name='settings'),
+    url('^emailTemplates/$', views.EmailTemplatesCreateView.as_view()),
 ]

@@ -2,8 +2,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="google-site-verification" content="Q3ryzVCxioLkcPVxTSYxfyadepjA_1a6QRVuebRKUxQ" />
     <meta charset="UTF-8">
+    <meta name="google-site-verification" content="Q3ryzVCxioLkcPVxTSYxfyadepjA_1a6QRVuebRKUxQ" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'dnow/css/style.css' %}" />
     {% block addstyle %}{% endblock %}
     <title>{% block title %}DNOW Administration{% endblock %}</title>
@@ -26,6 +28,7 @@
             <li><a href="/dnow/all_leaders/">Leaders</a></li>
             <li><a href="/dnow/spreadsheet/">Read Spreadsheet</a></li>
             <li><a href="/dnow/spreadsheetLog/">Spreadsheet Log</a></li>
+{#            <li><a href="/dnow/emailTemplates/">Email Templates</a></li>#}
 {#            <li><a href="/dnow/email/">Send Emails</a></li>#}
         </ul>
             {% if request.user.is_authenticated %}

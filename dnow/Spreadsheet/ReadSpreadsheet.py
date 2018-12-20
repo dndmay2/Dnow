@@ -1,9 +1,9 @@
 from __future__ import print_function
-import httplib2
+# import httplib2
 import os
 import sys
 from apiclient import discovery
-import json
+# import json
 import simplejson
 from oauth2client import client
 from oauth2client import tools
@@ -11,7 +11,7 @@ from oauth2client.file import Storage
 from dateutil.parser import parse
 from django.db import DataError
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
+# from django.conf import settings
 from google.oauth2 import service_account
 
 from dnow.models import *
@@ -35,6 +35,7 @@ LEADER_COLUMNS = {}
 DRIVER_COLUMNS = {}
 MEAL1 = 'Fri Snacks - 9:30PM'
 MEAL2 = 'Sat Dinner - 5:00PM'
+
 
 def printLog(s):
     print(s)
@@ -125,7 +126,7 @@ def getShirtSize(size):
         return 'XXL'
     elif size in ['xxxl', '3xl', 'triple xl', 'xxx-large']:
         return 'XXXL'
-    elif size in [ '', 'na', '-' ]:
+    elif size in ['', 'na', '-']:
         return '-'
     elif ',' in size:
         sizes = size.split(',')
@@ -135,6 +136,7 @@ def getShirtSize(size):
         return ', '.join(newSizes)
     else:
         return size + '?'
+
 
 def getBoolean(val):
     val = val.lower()
@@ -200,7 +202,7 @@ def checkStudentFriendMatchups(user):
     allStudents = Student.objects.filter(user=user).all()
     friendDict = {}
     for hh in hostHomesList:
-    # for hh in [hostHomesList.first()]:
+        # for hh in [hostHomesList.first()]:
         print('------------------------------------------------------------------------------')
         print('HOST HOME: %s Grade: %s Gender: %s' % (hh.lastName, hh.grade, hh.gender))
         hhStudents = hh.student_set.all().order_by('lastName')
@@ -223,8 +225,9 @@ def checkStudentFriendMatchups(user):
                     flag = '**'
             print('%2s %-10s %-12s : YES: %-20s\t NO: %-20s OTHER: %s' %
                   (flag, student.firstName, student.lastName, ','.join(yes), ','.join(no), other))
-            friendDict[student] = [ ','.join(yes), ','.join(no), other ]
+            friendDict[student] = [','.join(yes), ','.join(no), other]
     return friendDict
+
 
 class ReadSpreadsheet:
     def __init__(self, user):
@@ -236,6 +239,7 @@ class ReadSpreadsheet:
         """
         dnow.config.SPREADSHEET_LOG = ''
         self.user = user
+        self.spreadsheetId = None
         self.parseSpreadSheetUrl()
 
         # OLD
@@ -283,7 +287,6 @@ class ReadSpreadsheet:
             self.spreadsheetId = None
             printLog('**ERROR: Not a valid Google Spreadsheet path: %s' % urlPath)
         printLog('spreadSheetId = %s' % self.spreadsheetId)
-
 
     def getRangeValues(self, rangeName):
         result = self.service.spreadsheets().values().get(spreadsheetId=self.spreadsheetId, range=rangeName).execute()
@@ -338,13 +341,28 @@ class ReadSpreadsheet:
         self.currentTable = table
         return colNum
 
+    def isValidName(self, name):
+        name = name.lower()
+        if name == 'na':
+            return False
+        elif name == '':
+            return False
+        elif name == '-':
+            return False
+        elif name == '?':
+            return False
+        elif name == "leaders who are driving":
+            return False
+        else:
+            return True
+
     def readStudentRow(self, row):
         try:
             studentLastName = readCell(row, col=self.getColNum('students', 'Student Last Name'))
             if studentLastName == 'Byland':
                 pass
             studentFirstName = readCell(row, col=self.getColNum('students', 'Student First Name'))
-            if (studentFirstName and studentFirstName != 'NA') or (studentLastName and studentLastName != 'NA'):
+            if self.isValidName(studentFirstName)  or self.isValidName(studentLastName):
                 s = Student(firstName=studentFirstName, lastName=studentLastName)
                 s.grade = getGrade(readCell(row, col=self.getColNum('students', 'Student Grade')))
                 s.gender = getGender(readCell(row, col=self.getColNum('students', 'Student Gender')))
@@ -397,7 +415,7 @@ class ReadSpreadsheet:
         try:
             hostLastName = readCell(row, col=HOST_COLUMNS['Last Name'])
             hostFirstName = '' # readCell(row, col=HOST_COLUMNS[''])
-            if (hostFirstName and hostFirstName != 'NA') or (hostLastName and (hostLastName.lower() != 'na' and hostLastName != '?')):
+            if self.isValidName(hostFirstName) or self.isValidName(hostLastName):
                 hh = HostHome(firstName=hostFirstName, lastName=hostLastName)
                 hh.grade = getGrade(readCell(row, col=HOST_COLUMNS['Grades']))
                 hh.gender = getGender(readCell(row, col=HOST_COLUMNS['Gender']))
@@ -445,7 +463,7 @@ class ReadSpreadsheet:
         try:
             cookFirstName = readCell(row, col=COOK_COLUMNS['First Name'] )
             cookLastName = readCell(row, col=COOK_COLUMNS['Last Name'] )
-            if (cookFirstName and cookFirstName != 'NA') or (cookLastName and cookLastName != 'NA'):
+            if self.isValidName(cookFirstName) or self.isValidName(cookLastName):
                 c = Cook(firstName=cookFirstName, lastName=cookLastName)
                 c.phone = readCell(row, col=COOK_COLUMNS['Cell'] )
                 c.email = readCell(row, col=COOK_COLUMNS['Email'] )
@@ -499,7 +517,7 @@ class ReadSpreadsheet:
         try:
             leaderFirstName = readCell(row, col=LEADER_COLUMNS['First Name'] )
             leaderLastName = readCell(row, col=LEADER_COLUMNS['Last Name'] )
-            if (leaderFirstName and leaderFirstName != 'NA') or (leaderLastName and leaderLastName != 'NA'):
+            if self.isValidName(leaderFirstName) or self.isValidName(leaderLastName):
                 ldr = Leader(firstName=leaderFirstName, lastName=leaderLastName)
                 ldr.phone = readCell(row, col=LEADER_COLUMNS['Cell'] )
                 ldr.email = readCell(row, col=LEADER_COLUMNS['Email'] )
@@ -544,7 +562,7 @@ class ReadSpreadsheet:
         try:
             driverFirstName = readCell(row, col=DRIVER_COLUMNS['First Name'] )
             driverLastName = readCell(row, col=DRIVER_COLUMNS['Last Name'] )
-            if (driverFirstName and driverFirstName != 'NA') or (driverLastName and driverLastName != 'NA'):
+            if self.isValidName(driverFirstName) or self.isValidName(driverLastName):
                 d = Driver(firstName=driverFirstName, lastName=driverLastName)
                 d.phone = readCell(row, col=DRIVER_COLUMNS['Cell'] )
                 d.email = readCell(row, col=DRIVER_COLUMNS['Email'] )

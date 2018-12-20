@@ -33,6 +33,24 @@ DRIVE_SLOTS = (
     ('driveSlot6', '6 Sun, 8:20-8:45 am'),
 )
 
+EMAIL_DATA = (
+    ('hostHomeBasics', 'Host Home Basics'),
+    ('churchStaff', 'Church Staff'),
+    ('cooks', 'Cooks'),
+    ('driverData', 'Driver Data'),
+    ('leaders', 'Leaders'),
+    ('students', 'Students'),
+    ('tshirts', 'T-Shirts'),
+)
+
+TO_GROUPS = (
+    ('hostHomes', 'Host Homes'),
+    ('parents', 'Parents'),
+    ('drivers', 'Drivers'),
+    ('leaders', 'Leaders'),
+    ('students', 'Students'),
+)
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     googleSpreadSheet = models.TextField(max_length=500, blank=True)
@@ -149,3 +167,9 @@ class DriveSlot(models.Model):
     def __str__(self):
         return "%s @ %s - %d drivers" % (self.time, self.hostHome.lastName, self.drivers.count())
 
+class EmailTemplate(models.Model):
+    name = models.CharField(max_length=100)
+    greeting = models.TextField(blank=True)
+    closing = models.TextField(blank=True)
+    toGroups = models.CharField(max_length=50, choices=TO_GROUPS, default='?')
+    includeData = models.CharField(max_length=30, choices=EMAIL_DATA, default='?')

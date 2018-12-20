@@ -5,11 +5,12 @@ from django.core.mail import mail_admins
 from django.contrib.auth.models import User
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
+from django.views.generic import CreateView
 
 from Spreadsheet.ReadSpreadsheet import ReadSpreadsheet, checkStudentFriendMatchups
 from dnow.Email.SendEmail import *
 from dnow.htmlGenerators import *
-from .models import Student, Parent, HostHome, Driver, Cook, Leader, Profile
+from .models import Student, Parent, HostHome, Driver, Cook, Leader, Profile, EmailTemplate
 from .forms import SettingForm
 import config
 
@@ -229,3 +230,8 @@ def email(request):
         print('emailDrivers was pressed')
         emailAllDrivers(request.user)
     return render(request, 'dnow/emailPage.html')
+
+# @login_required
+class EmailTemplatesCreateView(CreateView):
+    model = EmailTemplate
+    fields = ('name', 'greeting', 'closing', 'includeData', 'toGroups')
