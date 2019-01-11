@@ -522,7 +522,10 @@ class HostHomeData(object):
 
 def genPrevNextFromIdList(objList, id):
     idList = list(objList.values_list('id', flat=True))
-    indx = idList.index(id)
+    try:
+        indx = idList.index(id)
+    except ValueError:
+        indx = 1
     nextIndx = indx + 1
     prevIndx = indx - 1
     if prevIndx < 0:

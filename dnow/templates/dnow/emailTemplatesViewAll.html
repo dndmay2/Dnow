@@ -1,0 +1,40 @@
+{% extends "dnow/base.html" %}
+
+{% block title %}Email Template List{% endblock %}
+
+{% block content %}
+<h2>Email Templates</h2>
+    <a href="/dnow/emailTemplateCreate/">Create New Template</a>
+
+{% if templates %}
+{#    <ul>#}
+{#    {% for template in templates %}#}
+{#        <li><a href="{% url 'emailTemplateView' template.id %}">{{ template.name }}</a> {{ template.toGroups}} </li>#}
+{#    {% endfor %}#}
+{#    </ul>#}
+    <table border="1">
+    <thead>
+        <tr>
+        <th>Template Name</th>
+        <th>To List</th>
+        <th>Content</th>
+        <th>Edit</th>
+        <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for template in templates %}
+        <tr>
+        <td><a href="{% url 'emailTemplateView' template.id %}">{{ template.name }}</a></td>
+        <td>{{ template.toGroups }}</td>
+        <td>{{ template.includeData }}</td>
+        <td><a href="{% url "emailTemplateUpdate" template.id %}">edit</a></td>
+        <td><a href="{% url "emailTemplateDelete" template.id %}">delete</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+{% else %}
+    <p>No templates in db.</p>
+{% endif %}
+{% endblock %}

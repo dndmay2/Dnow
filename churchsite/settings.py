@@ -18,6 +18,9 @@ import dj_database_url
 from django.conf.global_settings import DATABASES
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FIELD_ENCRYPTION_KEY = os.environ.get('FIELD_ENCRYPTION_KEY', '')
+
+
 # print('base_dir : %s' % BASE_DIR)
 # print(os.path.abspath(__file__), __file__)
 
@@ -34,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'encrypted_model_fields',
     'crispy_forms',
+    'multiselectfield',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

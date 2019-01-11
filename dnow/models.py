@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from django.db import models
 from localflavor.us import models as usmodels
 from django.contrib.auth.models import User
+from multiselectfield import MultiSelectField
 
 GRADE_CHOICES = (
     ('?', '?'),
@@ -25,37 +26,23 @@ SHIRT_SIZES = (
 )
 
 DRIVE_SLOTS = (
-    ('driveSlot1', '1 Fri, 8:45-9:30 pm'),
-    ('driveSlot2', '2 Sat, 9:50-10:30 am'),
-    ('driveSlot3', '3 Sat, 12:30-4:00 pm'),
-    ('driveSlot4', '4 Sat, 6:20-6:45 pm'),
-    ('driveSlot5', '5 Sat, 8:50-9:30 pm'),
-    ('driveSlot6', '6 Sun, 8:20-8:45 am'),
+    ('driveSlot1', '1 Fri, 6:45 pm @Host to CCC'),
+    ('driveSlot2', '2 Fri, 9:30 pm @CCC to Host'),
+    ('driveSlot3', '3 Sat, 9:50 am @Host to CCC'),
+    ('driveSlot4', '4 Sat, 12:50 pm @CCC to Legacy'),
+    ('driveSlot5', '5 Sat, 4:45 pm @Legacy to Host'),
+    ('driveSlot6', '6 Sat, 6:50 pm @Host to CCC'),
+    ('driveSlot7', '7 Sat, 8:45 pm @CCC to Host'),
+    ('driveSlot8', '8 Sun, 8:00 am @ Host to Sloan Creek'),
 )
 
-EMAIL_DATA = (
-    ('hostHomeBasics', 'Host Home Basics'),
-    ('churchStaff', 'Church Staff'),
-    ('cooks', 'Cooks'),
-    ('driverData', 'Driver Data'),
-    ('leaders', 'Leaders'),
-    ('students', 'Students'),
-    ('tshirts', 'T-Shirts'),
-)
-
-TO_GROUPS = (
-    ('hostHomes', 'Host Homes'),
-    ('parents', 'Parents'),
-    ('drivers', 'Drivers'),
-    ('leaders', 'Leaders'),
-    ('students', 'Students'),
-)
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     googleSpreadSheet = models.TextField(max_length=500, blank=True)
-    church = models.CharField(max_length=30, blank=True)
-    googleDriveEmail = models.CharField(max_length=30, blank=True)
+    churchName = models.CharField(max_length=30, blank=True)
+    churchEmailAddress = models.CharField(max_length=30, blank=True)
+    churchEmailPassword = models.CharField(max_length=30, blank=True)
 
 
 # Create your models here.
@@ -162,14 +149,60 @@ class DriveSlot(models.Model):
     hostHome = models.ForeignKey(HostHome, on_delete=models.CASCADE, null=True, blank=True)
     drivers = models.ManyToManyField(Driver)
     # time = models.DateTimeField(null=True, blank=True)
-    time = models.CharField(max_length=20, default='')
+    time = models.CharField(max_length=80, default='')
 
     def __str__(self):
         return "%s @ %s - %d drivers" % (self.time, self.hostHome.lastName, self.drivers.count())
 
+
+# class EmailToGroups(models.Model):
+#     TO_GROUPS = (
+#         ('hostHomes', 'Host Homes'),
+#         ('parents', 'Parents'),
+#         ('drivers', 'Drivers'),
+#         ('leaders', 'Leaders'),
+#         ('students', 'Students'),
+#     )
+#     toGroups = MultiSelectField(choices=TO_GROUPS)
+#
+#
+# class EmailData(models.Model):
+#     EMAIL_DATA = (
+#         ('hostHomeBasics', 'Host Home Basics'),
+#         ('churchStaff', 'Church Staff'),
+#         ('cooks', 'Cooks'),
+#         ('driverData', 'Driver Data'),
+#         ('leaders', 'Leaders'),
+#         ('students', 'Students'),
+#         ('tshirts', 'T-Shirts'),
+#     )
+#     includeData = MultiSelectField(choices=EMAIL_DATA)
+
+
 class EmailTemplate(models.Model):
+    class Meta:
+        ordering = ['name']
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=100)
     greeting = models.TextField(blank=True)
     closing = models.TextField(blank=True)
-    toGroups = models.CharField(max_length=50, choices=TO_GROUPS, default='?')
-    includeData = models.CharField(max_length=30, choices=EMAIL_DATA, default='?')
+    TO_GROUPS = (
+        ('hostHomes', 'Host Homes'),
+        ('parents', 'Parents'),
+        ('drivers', 'Drivers'),
+        ('leaders', 'Leaders'),
+    )
+    toGroups = MultiSelectField(choices=TO_GROUPS, default=None)
+    EMAIL_DATA = (
+        ('hostHomeBasics', 'Host Home Basics'),
+        ('churchStaff', 'Church Staff'),
+        ('cooks', 'Cooks'),
+        ('driverData', 'Driver Data'),
+        ('leaders', 'Leaders'),
+        ('students', 'Students'),
+        ('tshirts', 'T-Shirts'),
+    )
+    includeData = MultiSelectField(choices=EMAIL_DATA, default=None)
+    # toGroups = models.ManyToManyField(EmailToGroups, default=0)
+    # includeData = models.ManyToManyField(EmailData, default=0)

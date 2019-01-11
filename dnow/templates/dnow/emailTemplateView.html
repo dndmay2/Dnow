@@ -1,0 +1,25 @@
+{% extends "dnow/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Email Template{% endblock %}
+
+{% block content %}
+{% if template %}
+    <h3>Template Name: {{ template.name }}</h3>
+    <div class="form-row">
+        <div class="form-group col-md-6 mb-0">
+            <form method="get" action="#">
+                {{ form.hostHomes|as_crispy_field }}
+                <input type="submit" value="Send Real Email" name="sendRealEmail">
+                <input type="submit" value="Send Test Email to Me" name="sendTestEmail">
+            </form>
+        </div>
+        {{ logMessage }}
+    </div>
+
+    <b>To:</b> {{ template.toGroups }}<br><br>
+    {% include "dnow/baseEmail.html" %}
+{% else %}
+    <p>No template in db.</p>
+{% endif %}
+{% endblock %}

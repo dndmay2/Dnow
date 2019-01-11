@@ -1,0 +1,34 @@
+{{ template.greeting|safe }}<br>
+<br>
+{% if hhBaseHtml %}
+    <h5>Host Home:</h5>
+    {{ hhBaseHtml|safe }}
+{% endif %}
+{% if cooksHtml %}
+    <h5>Cooks:</h5>
+    {{ cooksHtml|safe }}
+{% endif %}
+{% if leaderHtml %}
+    <h5>Leaders:</h5>
+    {{ leaderHtml|safe }}
+{% endif %}
+{% if driverHtml %}
+    <h5>Drivers:</h5>
+    {{ driverHtml|safe }}
+{% endif %}
+{% if tshirtHtml %}
+    <h5>T-Shirts:</h5>
+    {{ tshirtHtml|safe }}
+{% endif %}
+{% if studentHtml %}
+    <h5>Students:</h5>
+    <h5>Total # students = {{ studentCount|safe }}</h5>
+    {{ studentHtml|safe }}
+{% endif %}
+{% if churchStaffHtml %}
+    <h5>Church Staff:</h5>
+    {{ churchStaffHtml|safe }}
+{% endif %}
+<br>
+    {{ template.closing }}<br>
+<br>

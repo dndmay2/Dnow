@@ -5,14 +5,19 @@ from django.core.mail import mail_admins
 from django.contrib.auth.models import User
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
-from django.views.generic import CreateView
+from django.utils.decorators import method_decorator
+from django.views.generic import CreateView, ListView, DetailView
+from django.views.generic.edit import UpdateView, DeleteView
+from django.urls import reverse_lazy
 
 from Spreadsheet.ReadSpreadsheet import ReadSpreadsheet, checkStudentFriendMatchups
 from dnow.Email.SendEmail import *
 from dnow.htmlGenerators import *
 from .models import Student, Parent, HostHome, Driver, Cook, Leader, Profile, EmailTemplate
-from .forms import SettingForm
+from .forms import SettingForm, EmailTemplateForm, HostHomeDropDownForm
 import config
+import time
+
 
 def profile(request):
     #...
@@ -50,9 +55,9 @@ def login(request):
                 if hasattr(user, 'profile') and user.profile is not None:
                     print('found profile', user.profile)
                 else:
-                    Profile.objects.create(user=user, googleSpreadSheet='googleSpreadSheet', church='campus', googleDriveEmail='me@gmail.com')
+                    Profile.objects.create(user=user, googleSpreadSheet='googleSpreadSheet', churchName='campus', churchEmailAddress='me@gmail.com')
                     print('failed if')
-                    Profile.objects.create(user=user, googleSpreadSheet='googleSpreadSheet', church='campus', googleDriveEmail='me@gmail.com')
+                    Profile.objects.create(user=user, googleSpreadSheet='googleSpreadSheet', churchName='campus', churchEmailAddress='me@gmail.com')
             except Exception:
                 print('did not find profile')
             return redirect('/dnow/')
@@ -70,7 +75,9 @@ def logout(request):
 
 def user_details(request):
     user = get_object_or_404(User, id=request.user.id)
-    return render(request, 'dnow/user_details.html', {'user': user})
+    password = '#' * len(user.profile.churchEmailPassword)
+    print(password)
+    return render(request, 'dnow/user_details.html', {'user': user, 'password': password})
 
 # @login_required
 def index(request):
@@ -211,7 +218,10 @@ def spreadsheet(request):
         ss.readCooks()
         ss.readDrivers()
         ss.readLeaders()
-    return render(request, 'dnow/spreadsheet.html')
+        logMessage = 'Done reading spreadsheet!'
+    else:
+        logMessage = ''
+    return render(request, 'dnow/spreadsheet.html', {'logMessage': logMessage})
 
 
 @login_required
@@ -232,6 +242,104 @@ def email(request):
     return render(request, 'dnow/emailPage.html')
 
 # @login_required
-class EmailTemplatesCreateView(CreateView):
+class emailTemplateCreate(CreateView):
     model = EmailTemplate
-    fields = ('name', 'greeting', 'closing', 'includeData', 'toGroups')
+    form_class = EmailTemplateForm
+    template_name = 'dnow/emailtemplateCreate.html'
+    success_url = reverse_lazy('emailTemplatesViewAll')
+    # fields = ('name', 'greeting', 'closing', 'includeData', 'toGroups')
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        return super(emailTemplateCreate, self).form_valid(form)
+
+class emailTemplateUpdate(UpdateView):
+    model = EmailTemplate
+    form_class = EmailTemplateForm
+    template_name = 'dnow/emailtemplateCreate.html'
+    success_url = reverse_lazy('emailTemplatesViewAll')
+    # fields = ('name', 'greeting', 'closing', 'includeData', 'toGroups')
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        return super(emailTemplateUpdate, self).form_valid(form)
+
+@login_required
+def emailTemplatesViewAll(request):
+    templates = EmailTemplate.objects.filter(user=request.user).order_by('name')
+    return render(request, 'dnow/emailTemplatesViewAll.html', {'templates': templates})
+
+def emailTemplateView(request, template_id):
+    # type: (object, object) -> object
+    template = get_object_or_404(EmailTemplate, pk=template_id)
+    template.greeting = template.greeting.replace('\n', '<br>')
+    print('template.togroups', template.toGroups[0])
+    if template.toGroups[0] == 'hostHomes':
+        hh, hhData, form, sendAll = getHostHomeFromHostHomeDropdown(request)
+    elif template.toGroups[0] == 'drivers':
+        hh, hhData, form, sendAll = getHostHomeFromHostHomeDropdown(request)
+    elif template.toGroups[0] == 'leaders':
+        hh, hhData, form, sendAll = getHostHomeFromHostHomeDropdown(request)
+    elif template.toGroups[0] == 'parents':
+        hh, hhData, form, sendAll = getHostHomeFromHostHomeDropdown(request)
+    context = hhData.getHtmlContext()
+    context = filterTheContext(context, template)
+    context['template'] = template
+    context['form'] = form
+    context['logMessage'] = ''
+    context['hostHome'] = hh
+    if request.GET.get('sendTestEmail'):
+        context['logMessage'] = 'Sent test email to me @ %s' % time.strftime("%Y-%m-%d %H:%M")
+        dnowEmailTest(user=request.user, htmlContext=context)
+    elif request.GET.get('sendRealEmail'):
+        context['logMessage'] = 'Sent real email to list'
+    return render(request, 'dnow/emailTemplateView.html', context)
+
+def getHostHomeFromHostHomeDropdown(request):
+    hhExample = HostHome.objects.filter(user=request.user).first()
+    if request.GET:
+        form = HostHomeDropDownForm(request.user, request.GET)
+        # print('errors', form.errors)
+        if form.is_valid():
+            selectedHostHome = form.cleaned_data['hostHomes']
+            print('YO', selectedHostHome)
+            if selectedHostHome:
+                hhExample = selectedHostHome
+        sendAll = False
+    else:
+        form = HostHomeDropDownForm(request.user)
+        sendAll = True
+    hhData = HostHomeData(hhExample, user=request.user, dest='email')
+    return hhExample, hhData, form, sendAll
+
+def filterTheContext(context, template):
+    if 'hostHomeBasics' not in template.includeData:
+        context['hhBaseHtml'] = None
+    if 'churchStaff' not in template.includeData:
+        context['churchStaffHtml'] = None
+    if 'cooks' not in template.includeData:
+        context['cooksHtml'] = None
+    if 'driverData' not in template.includeData:
+        context['driverHtml'] = None
+    if 'leaders' not in template.includeData:
+        context['leaderHtml'] = None
+    if 'students' not in template.includeData:
+        context['studentHtml'] = None
+    if 'tshirts' not in template.includeData:
+        context['tshirtHtml'] = None
+    return context
+
+def emailTemplateDelete(request, template_id):
+    template = get_object_or_404(EmailTemplate, pk=template_id)
+    if request.method=='POST':
+        template.delete()
+        return redirect('/dnow/emailTemplatesViewAll/')
+    return render(request, 'dnow/emailTemplateDelete.html', {'object': template})
+
+def sendEmails(request):
+    form = HostHomeDropDownForm(request.user)
+    if request.GET.get('dnowEmailTest'):
+        dnowEmailTest(request.user, debug=True)
+    return render(request, 'dnow/sendEmail.html',{'form': form})

@@ -1,5 +1,6 @@
-<h3>Host home: {{ hostHome.firstName }} {{ hostHome.lastName }}</h3>
-<p> <a href="https://maps.google.com/?q={{ hostHome.street }}+{{ hostHome.city }},+{{ hostHome.state }}+{{ hostHome.zipCode }}">
+<p>
+    {{ hostHome.firstName }} {{ hostHome.lastName }} <br>
+    <a href="https://maps.google.com/?q={{ hostHome.street }}+{{ hostHome.city }},+{{ hostHome.state }}+{{ hostHome.zipCode }}">
     {{ hostHome.street }}<br>
     {{ hostHome.city }}, {{ hostHome.state }} {{ hostHome.zipCode }}
     </a>

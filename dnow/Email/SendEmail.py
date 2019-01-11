@@ -7,9 +7,29 @@ from dnow.htmlGenerators import *
 from dnow.models import *
 
 
-def dnowEmailTest(debug=True):
-    hh = HostHome.objects.get(lastName='May')
-    emailHostHome(hh, debug=debug)
+def dnowEmailTest(user, htmlContext, debug=True):
+    print('sending test email', user.profile.churchEmailAddress, user.profile.churchEmailPassword)
+    msgHtml = render_to_string('dnow/testEmailTemplate.html', context=htmlContext)
+    hh = htmlContext['hostHome']
+    staffList = Leader.objects.filter(user=user).order_by('lastName').filter(churchStaff=True)
+    staffEmails = [ leader.email for leader in staffList ]
+    leaderEmails = [ leader.email for leader in hh.leader_set.all() ]
+    toList = [ hh.email ] + leaderEmails + staffEmails
+    subject = 'DNOW Weekend: Host Home Info - %s ' % (hh.lastName)
+    # print('  To: ' + ', '.join(toList))
+    # print('  ' + subject + '\n\n')
+    # print(msgPlain)
+    msgPlain = "plain message"
+    toList = ['dndmay2@gmail.com']
+    connection = get_connection()
+    connection.username = user.profile.churchEmailAddress
+    connection.password = user.profile.churchEmailPassword
+    msg = EmailMultiAlternatives(subject, msgPlain, user.profile.churchEmailAddress, toList, connection=connection)
+    msg.attach_alternative(msgHtml, "text/html")
+    msg.send()
+
+    # hh = HostHome.objects.filter(user=user).get(lastName='May')
+    # emailHostHome(hh, user, debug=debug)
     # driver = Driver.objects.get(lastName='May', firstName='Derek')
     # emailDriver(driver, debug=debug)
     # cook = Cook.objects.get(lastName='Lasseter', firstName='Katie')
@@ -17,7 +37,7 @@ def dnowEmailTest(debug=True):
     # student = Student.objects.get(lastName='May', firstName='Avery')
     # emailParent(student, debug=debug)
 
-    debug=False
+    # debug=False
     # hh = HostHome.objects.get(lastName='Debenport')
     # emailHostHome(hh, debug=debug)
     # student = Student.objects.get(lastName='Stoltzfus', firstName='Judah')
@@ -29,14 +49,14 @@ def dnowEmailTest(debug=True):
 
 
 
-def emailHostHome(hh, debug=False):
-    hhData = HostHomeData(hh, dest='email')
+def emailHostHome(hh, user, debug=False):
+    hhData = HostHomeData(hh, user, dest='email')
     htmlContext = hhData.getHtmlContext()
     textContext = hhData.getTextContext()
     msgPlain = render_to_string('dnow/emailHostHomes.txt', context=textContext)
     msgHtml = render_to_string('dnow/emailHostHomes.html', context=htmlContext)
 
-    staffList = Leader.objects.order_by('lastName').filter(churchStaff=True)
+    staffList = Leader.objects.filter(user=user).order_by('lastName').filter(churchStaff=True)
     staffEmails = [ leader.email for leader in staffList ]
     leaderEmails = [ leader.email for leader in hh.leader_set.all() ]
     toList = [ hh.email ] + leaderEmails + staffEmails
@@ -47,24 +67,30 @@ def emailHostHome(hh, debug=False):
         print(msgPlain)
         toList = ['dndmay2@gmail.com']
     # A debug flag besides True (like 1 or 'a') will set toList to dndmay2, but send email
-    if debug is not True:
-        send_mail(
-            subject,
-            msgPlain,
-            'dndmay1@gmail.com',
-            toList,
-            html_message=msgHtml,
-            auth_user='dndmay1@gmail.com',
-            auth_password=os.environ.get('GMP'),
-        )
+    # if debug is not True:
+    # send_mail(
+    #     subject,
+    #     msgPlain,
+    #     'dnow@chaseoaks.org',
+    #     toList,
+    #     html_message=msgHtml,
+    #     auth_user='dmay@chaseoaks.org',
+    #     auth_password=os.environ.get('GMP'),
+    # )
+    connection = get_connection()
+    connection.username = 'dmay@chaseoaks.org'
+    connection.password = os.environ.get('GMP')
+    msg = EmailMultiAlternatives(subject, msgPlain, 'dmay@chaseoaks.org', toList, connection=connection, reply_to=['dnow@chaseoaks.org'])
+    msg.attach_alternative(msgHtml, "text/html")
+    msg.send()
 
 
 def emailAllHostHomes(user, debug=True):
-    hostHomesList = HostHome.objects.exclude(grade__contains='?').order_by('lastName')
+    hostHomesList = HostHome.objects.filter(user=user).exclude(grade__contains='?').order_by('lastName')
     for hh in hostHomesList:
         if hh.student_set.count() > 0:
             print('Emailing %s : %s' % (hh.lastName, hh.email))
-            emailHostHome(hh, debug=debug)
+            emailHostHome(hh, user, debug=debug)
         else:
             print('SKIPPING %s because they do not have any students' % hh.lastName)
 
@@ -107,25 +133,25 @@ def emailDriver(driver, debug=False):
     # A debug flag besides True (like 1 or 'a') will set toList to dndmay2, but send email
     if debug is not True:
         connection = get_connection()
-        connection.username = 'dndmay1@gmail.com'
+        connection.username = 'dmay@chaseoaks.org'
         connection.password = os.environ.get('GMP')
-        msg = EmailMultiAlternatives(subject, msgPlain, 'dndmay1@gmail.com', toList, connection=connection)
+        msg = EmailMultiAlternatives(subject, msgPlain, 'dmay@chaseoaks.org', toList, connection=connection, reply_to=['dnow@chaseoaks.org'])
         msg.attach_alternative(msgHtml, "text/html")
         msg.attach_file('dnow/static/dnow/files/DNOWSchedule2018.docx')
         msg.send()
         # send_mail(
         #     subject,
         #     msgPlain,
-        #     'dndmay1@gmail.com',
+        #     'dmay@chaseoaks.org',
         #     toList,
         #     html_message=msgHtml,
-        #     auth_user='dndmay1@gmail.com',
+        #     auth_user='dmay@chaseoaks.org',
         #     auth_password=os.environ.get('GMP'),
         # )
 
 
 def emailAllDrivers(user, debug=True):
-    driverList = Driver.objects.order_by('lastName')
+    driverList = Driver.objects.filter(user=user).order_by('lastName')
     for driver in driverList:
         if driver.driveslot_set.count() > 0:
             print('Emailing %s : %s' % (driver.lastName, driver.email))
@@ -171,19 +197,26 @@ def emailCook(cook, debug=False):
         toList = ['dndmay2@gmail.com']
     # A debug flag besides True (like 1 or 'a') will set toList to dndmay2, but send email
     if debug is not True:
-        send_mail(
-            subject,
-            msgPlain,
-            'dndmay1@gmail.com',
-            toList,
-            html_message=msgHtml,
-            auth_user='dndmay1@gmail.com',
-            auth_password=os.environ.get('GMP'),
-        )
+        connection = get_connection()
+        connection.username = 'dmay@chaseoaks.org'
+        connection.password = os.environ.get('GMP')
+        msg = EmailMultiAlternatives(subject, msgPlain, 'dmay@chaseoaks.org', toList, connection=connection, reply_to=['dnow@chaseoaks.org'])
+        msg.attach_alternative(msgHtml, "text/html")
+        msg.attach_file('dnow/static/dnow/files/DNOWSchedule2018.docx')
+        msg.send()
+        # send_mail(
+        #     subject,
+        #     msgPlain,
+        #     'dmay@chaseoaks.org',
+        #     toList,
+        #     html_message=msgHtml,
+        #     auth_user='dmay@chaseoaks.org',
+        #     auth_password=os.environ.get('GMP'),
+        # )
 
 
 def emailAllCooks(user, debug=True):
-    cookList = Cook.objects.order_by('lastName')
+    cookList = Cook.objects.filter(user=user).order_by('lastName')
     for cook in cookList:
         if cook.meal_set.count() > 0:
             print('Emailing %s : %s' % (cook.lastName, cook.email))
@@ -223,10 +256,10 @@ def emailParent(student, debug=False):
     # A debug flag besides True (like 1 or 'a') will set toList to dndmay2, but send email
     if debug is not True:
         connection = get_connection()
-        connection.username = 'dndmay1@gmail.com'
+        connection.username = 'dmay@chaseoaks.org'
         connection.password = os.environ.get('GMP')
         # connection.password = ''
-        msg = EmailMultiAlternatives(subject, msgPlain, 'dndmay1@gmail.com', toList, connection=connection, reply_to=['dndmay1@gmail.com'])
+        msg = EmailMultiAlternatives(subject, msgPlain, 'dmay@chaseoaks.org', toList, connection=connection, reply_to=['dnow@chaseoaks.org'])
         msg.attach_alternative(msgHtml, "text/html")
         msg.attach_file('dnow/static/dnow/files/DNOWSchedule2018.docx')
         if not student.medicalForm:
@@ -236,7 +269,7 @@ def emailParent(student, debug=False):
 
 
 def emailAllParents(user, debug=True):
-    studentList = Student.objects.order_by('lastName')
+    studentList = Student.filter(user=user).order_by('lastName')
     # start = False # Needed when failed in middle of job
     start = True
     for student in studentList:
@@ -247,11 +280,11 @@ def emailAllParents(user, debug=True):
             start = True
 
 
-def findBadEmailAddresses():
-    parentEmails = [student.parentEmail.lower() for student in Student.objects.all()]
-    hhEmails = [hh.email.lower() for hh in HostHome.objects.all()]
-    cookEmails = [cook.email.lower() for cook in Cook.objects.all()]
-    driverEmails = [driver.email.lower() for driver in Driver.objects.all()]
+def findBadEmailAddresses(user):
+    parentEmails = [student.parentEmail.lower() for student in Student.objects.filter(user=user)]
+    hhEmails = [hh.email.lower() for hh in HostHome.objects.filter(user=user)]
+    cookEmails = [cook.email.lower() for cook in Cook.objects.filter(user=user)]
+    driverEmails = [driver.email.lower() for driver in Driver.objects.filter(user=user)]
     badEmails = set()
     for e in hhEmails + cookEmails + driverEmails:
         if e not in parentEmails:

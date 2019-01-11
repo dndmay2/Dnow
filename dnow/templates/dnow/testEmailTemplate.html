@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DNOW 2019 Email</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 2px;
+        }
+    </style>
+
+</head>
+<body>
+<b>To:</b> {{ template.toGroups }}<br><br>
+{% include "dnow/baseEmail.html" %}
+</body>

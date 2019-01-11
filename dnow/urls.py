@@ -25,6 +25,11 @@ urlpatterns = [
     url(r'^login/$', views.login, name='login'),
     url(r'^logout/$', views.logout, name='logout'),
     url(r'^user_details/$', views.user_details, name='user_details'),
-    url('^settings/$', views.settings, name='settings'),
-    url('^emailTemplates/$', views.EmailTemplatesCreateView.as_view()),
+    url(r'^settings/$', views.settings, name='settings'),
+    url(r'^emailTemplateCreate/$', views.emailTemplateCreate.as_view()),
+    url(r'^emailTemplatesViewAll/$', views.emailTemplatesViewAll, name='emailTemplatesViewAll'),
+    url(r'^emailTemplateView/(?P<template_id>[0-9]+)$', views.emailTemplateView, name='emailTemplateView'),
+    url(r'^emailTemplateUpdate/(?P<pk>[0-9]+)$', views.emailTemplateUpdate.as_view(), name='emailTemplateUpdate'),
+    url(r'^emailTemplateDelete/(?P<template_id>[0-9]+)$', views.emailTemplateDelete, name='emailTemplateDelete'),
+    url(r'^sendEmails/$', views.sendEmails, name='sendEmails'),
 ]

@@ -176,7 +176,11 @@ def checkFriendAgainstSet(friends, students):
     for friend in friends.split(','):
         friend = friend.strip()
         if ' ' in friend:
-            firstName, lastName = friend.split()
+            try:
+                firstName, lastName = friend.split()
+            except ValueError:
+                print('ERROR: Separate friend names with commas: %s' % friend)
+                firstName = lastName = ''
             f1 = students.filter(firstName=firstName, lastName=lastName).first()
             if f1:
                 yes.append(f1.lastName)
@@ -541,7 +545,7 @@ class ReadSpreadsheet:
             printLog('Error with leader row: %s %s' % (row, e))
 
     def readDrivers(self):
-        rangeName = 'Drivers!A2:M'
+        rangeName = 'Drivers!A2:O'
         printLog('\nReading drivers from %s' % rangeName)
         values = self.getRangeValues(rangeName)
 

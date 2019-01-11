@@ -19,7 +19,10 @@
                 <dd>{{ request.user.username }}</dd>
 
                 <dt>Email</dt>
-                <dd>{{ request.user.profile.googleDriveEmail }}</dd>
+                <dd>{{ request.user.profile.churchEmailAddress }}</dd>
+
+                <dt>Email Password</dt>
+                <dd>{{ password }}</dd>
 
                 <dt>Date Joined</dt>
                 <dd>{{ request.user.date_joined }}</dd>

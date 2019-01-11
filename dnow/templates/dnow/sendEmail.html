@@ -1,0 +1,27 @@
+{% extends 'dnow/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+{#    {% crispy form %}#}
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-row">
+      <div class="form-group col-md-6 mb-0">
+        {{ form.hostHomes|as_crispy_field }}
+      </div>
+      <div class="form-group col-md-6 mb-0">
+        {{ form.drivers|as_crispy_field }}
+      </div>
+      <div class="form-group col-md-6 mb-0">
+        {{ form.leaders|as_crispy_field }}
+      </div>
+      <div class="form-group col-md-6 mb-0">
+        {{ form.students|as_crispy_field }}
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Send Email</button>
+  </form>
+    <form action="#" method="get" class="submit">
+         <input type="submit" value="Send Test Email" name="dnowEmailTest">
+    </form>
+{% endblock %}
