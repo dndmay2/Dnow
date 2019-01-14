@@ -11,10 +11,12 @@ from django.views.generic.edit import UpdateView, DeleteView
 from django.urls import reverse_lazy
 
 from Spreadsheet.ReadSpreadsheet import ReadSpreadsheet, checkStudentFriendMatchups
+from dnow.Email.EmailTemplateSupport import *
 from dnow.Email.SendEmail import *
 from dnow.htmlGenerators import *
 from .models import Student, Parent, HostHome, Driver, Cook, Leader, Profile, EmailTemplate
-from .forms import SettingForm, EmailTemplateForm, HostHomeDropDownForm
+from .forms import SettingForm, EmailTemplateForm, HostHomeDropDownForm, LeaderDropDownForm, StudentDropDownForm
+
 import config
 import time
 
@@ -274,62 +276,54 @@ def emailTemplatesViewAll(request):
 def emailTemplateView(request, template_id):
     # type: (object, object) -> object
     template = get_object_or_404(EmailTemplate, pk=template_id)
-    template.greeting = template.greeting.replace('\n', '<br>')
-    print('template.togroups', template.toGroups[0])
-    if template.toGroups[0] == 'hostHomes':
-        hh, hhData, form, sendAll = getHostHomeFromHostHomeDropdown(request)
-    elif template.toGroups[0] == 'drivers':
-        hh, hhData, form, sendAll = getHostHomeFromHostHomeDropdown(request)
-    elif template.toGroups[0] == 'leaders':
-        hh, hhData, form, sendAll = getHostHomeFromHostHomeDropdown(request)
-    elif template.toGroups[0] == 'parents':
-        hh, hhData, form, sendAll = getHostHomeFromHostHomeDropdown(request)
-    context = hhData.getHtmlContext()
-    context = filterTheContext(context, template)
-    context['template'] = template
+    print('template.togroups', template.toGroups)
+    sendAll = False
+    form = objects = hhData = None
+    curObject, hhData, form, sendAll, objects = getCurrentObject(template, request)
+    hh = getHostHomeFromObject(curObject)
+    if hhData:
+        context = hhData.getHtmlContext()
+        context = filterTheContext(context, template)
+        textContext = hhData.getTextContext()
+        textContext = filterTheContext(textContext, template)
+        context['isCook'] = context['isDriver'] = False
+    else:
+        if template.toGroups == 'cooks':
+            context, textContext = getCookContext(request.user, curObject)
+        elif template.toGroups == 'drivers':
+            context, textContext = getDriverContext(request.user, curObject)
+
+    context['template'] = textContext['template'] = template
+    context['hostHome'] = textContext['hostHome'] = hh
+    context['curObject'] = textContext['curObject'] = curObject
+    context['curEmail'] = textContext['curEmail'] = getEmailForObject(curObject)
+    context['objects'] = objects
     context['form'] = form
     context['logMessage'] = ''
-    context['hostHome'] = hh
+    context['htmlGreeting'] = template.greeting.replace('\n', '<br>')
+    context['htmlClosing'] = template.closing.replace('\n', '<br>')
+    context['sendAll'] = sendAll
+    sendEmail = debug = False
+    debugMsg = ''
     if request.GET.get('sendTestEmail'):
-        context['logMessage'] = 'Sent test email to me @ %s' % time.strftime("%Y-%m-%d %H:%M")
-        dnowEmailTest(user=request.user, htmlContext=context)
+        debug = True
+        debugMsg = ' (Debug only sent to me)'
+        sendEmail = True
+    if request.GET.get('sendRealEmail'):
+        sendEmail = True
+    if sendEmail:
+        if sendAll:
+            context['logMessage'] = 'Sent all emails%s @ %s' % (debugMsg, time.strftime("%Y-%m-%d %H:%M"))
+            dnowEmailAllTest(user=request.user, startingContext=context, debug=debug)
+        else:
+            context['logMessage'] = 'Sent one email%s @ %s' % (debugMsg, time.strftime("%Y-%m-%d %H:%M"))
+            dnowEmailTest(user=request.user, htmlContext=context, textContext=textContext, debug=debug)
+        debug = False
     elif request.GET.get('sendRealEmail'):
         context['logMessage'] = 'Sent real email to list'
     return render(request, 'dnow/emailTemplateView.html', context)
 
-def getHostHomeFromHostHomeDropdown(request):
-    hhExample = HostHome.objects.filter(user=request.user).first()
-    if request.GET:
-        form = HostHomeDropDownForm(request.user, request.GET)
-        # print('errors', form.errors)
-        if form.is_valid():
-            selectedHostHome = form.cleaned_data['hostHomes']
-            print('YO', selectedHostHome)
-            if selectedHostHome:
-                hhExample = selectedHostHome
-        sendAll = False
-    else:
-        form = HostHomeDropDownForm(request.user)
-        sendAll = True
-    hhData = HostHomeData(hhExample, user=request.user, dest='email')
-    return hhExample, hhData, form, sendAll
 
-def filterTheContext(context, template):
-    if 'hostHomeBasics' not in template.includeData:
-        context['hhBaseHtml'] = None
-    if 'churchStaff' not in template.includeData:
-        context['churchStaffHtml'] = None
-    if 'cooks' not in template.includeData:
-        context['cooksHtml'] = None
-    if 'driverData' not in template.includeData:
-        context['driverHtml'] = None
-    if 'leaders' not in template.includeData:
-        context['leaderHtml'] = None
-    if 'students' not in template.includeData:
-        context['studentHtml'] = None
-    if 'tshirts' not in template.includeData:
-        context['tshirtHtml'] = None
-    return context
 
 def emailTemplateDelete(request, template_id):
     template = get_object_or_404(EmailTemplate, pk=template_id)

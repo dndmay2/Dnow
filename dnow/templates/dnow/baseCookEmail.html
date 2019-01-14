@@ -1,0 +1,18 @@
+<p>Dear {{ curObject.firstName }},</p>
+{{ htmlGreeting|safe }}<br>
+<br>
+
+{% for meal in curObject.meal_set.all %}
+Meal: <b>{{ meal.time }}</b>
+{% endfor %}
+<br>
+{{ hostHomeHtml|safe }}
+
+{% if churchStaffHtml %}
+    <h3>Church Staff:</h3>
+    If you have any questions, please feel free to reach out to the church staff:
+    {{ churchStaffHtml|safe }}
+{% endif %}
+<br>
+    {{ htmlClosing|safe }}<br>
+<br>

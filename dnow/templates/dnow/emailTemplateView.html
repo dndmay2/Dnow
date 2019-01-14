@@ -9,7 +9,17 @@
     <div class="form-row">
         <div class="form-group col-md-6 mb-0">
             <form method="get" action="#">
-                {{ form.hostHomes|as_crispy_field }}
+                {% if form.hostHomes %}
+                    {{ form.hostHomes|as_crispy_field }}
+                {% elif form.leaders %}
+                    {{ form.leaders|as_crispy_field }}
+                {% elif form.students %}
+                    {{ form.students|as_crispy_field }}
+                {% elif form.drivers %}
+                    {{ form.drivers|as_crispy_field }}
+                {% elif form.cooks %}
+                    {{ form.cooks|as_crispy_field }}
+                {% endif %}
                 <input type="submit" value="Send Real Email" name="sendRealEmail">
                 <input type="submit" value="Send Test Email to Me" name="sendTestEmail">
             </form>
@@ -17,8 +27,29 @@
         {{ logMessage }}
     </div>
 
-    <b>To:</b> {{ template.toGroups }}<br><br>
-    {% include "dnow/baseEmail.html" %}
+    <b>To:</b> {{ template.toGroups }}<br>
+    {% if sendAll %}
+        All emails:
+        {% for obj in objects %}
+            {% if obj.parentEmail %}
+                {{ obj.parentEmail }},
+            {% else %}
+                {{ obj.email }},
+            {% endif %}
+        {% endfor %}
+        <br><i>Below we have one sample email. Each home will receive one customized just for them.</i>
+    {% else %}
+        One email: {{ curEmail }}
+    {% endif %}
+    <br><br>
+    <b>Subject:</b> {{ template.subject }} - {{ curObject.lastName }}<br><br>
+    {% if isCook %}
+        {% include "dnow/baseCookEmail.html" %}
+    {% elif isDriver %}
+        {% include "dnow/baseDriverEmail.html" %}
+    {% else %}
+        {% include "dnow/baseEmail.html" %}
+    {% endif %}
 {% else %}
     <p>No template in db.</p>
 {% endif %}

@@ -120,6 +120,8 @@ def getShirtSize(size):
         return 'L'
     elif size in ['s', 'sm', 'small']:
         return 'S'
+    elif size in ['xs', 'xsm', 'x-small']:
+        return 'XS'
     elif size in ['xl', 'extra large', 'xtra large', 'x-large', 'xtra-large', 'xlarge', 'x large']:
         return 'XL'
     elif size in ['xxl', '2xl', 'double xl', 'xx-large']:
@@ -164,7 +166,8 @@ def getMoney(val):
 
 def getAllergy(val):
     val = val.lower()
-    if val == 'none' or val == 'na':
+    ignore = ['none', 'na', 'n/a', 'no known allergies', 'n,a', 'no', 'none known']
+    if val in ignore:
         val = ''
     val = val.replace('/', ',')
     return val
@@ -434,7 +437,11 @@ class ReadSpreadsheet:
                 hh.allergy = getAllergy(readCell(row, col=HOST_COLUMNS['Allergy']))
                 hh.color = readCell(row, col=HOST_COLUMNS['Color'])
                 hh.user = self.user
-                hh.save()
+                if hh.grade == '?':
+                    hh = None
+                else:
+                    hh.save()
+            print(hostLastName, hh)
         except Exception as e:
             printLog('Error with hosthome row: %s %s' % (row, e))
         if hh:

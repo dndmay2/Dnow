@@ -76,13 +76,14 @@ def generateShirtSizesSummaryHtml(tshirtCounts):
 
 def generateLeadersTable(hostHome):
     leaders = hostHome.leader_set.all()
-    table = [['Name', 'Phone', 'T Shirt Size', 'Allergies']]
+    table = [['Name', 'Phone', 'T Shirt Size', 'Allergies', 'Email']]
     for leader in leaders:
         row = []
         row.append('%s %s' % (leader.firstName, leader.lastName))
         row.append(leader.phone)
         row.append(leader.tshirtSize)
         row.append(leader.allergy)
+        row.append(leader.email)
         table.append(row)
     return table
 
@@ -224,7 +225,8 @@ def generateDriverDetailsTable(hostHome, dest='html'):
         cell += '%d drivers : %d seats%s' % (len(drivers), totalSeats, newLine)
         # Student leaders have to be passengers
         # However, they should be able to drive Friday night and Sunday morning
-        if slot == 1 or slot == 6:
+        # TODO - this is hard coded to say that leaders don't need a car slot on the last day
+        if slot == len(driveSlots):
             numPassengers = numStudents
             cell += '%d students + 0 leaders = %d%s' % (numStudents,  numPassengers, newLine)
         else:

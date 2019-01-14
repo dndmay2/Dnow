@@ -5,28 +5,50 @@ from django.core.mail import EmailMultiAlternatives, get_connection
 
 from dnow.htmlGenerators import *
 from dnow.models import *
+from dnow.Email.EmailTemplateSupport import filterTheContext, getEmailForObject
 
 
-def dnowEmailTest(user, htmlContext, debug=True):
-    print('sending test email', user.profile.churchEmailAddress, user.profile.churchEmailPassword)
-    msgHtml = render_to_string('dnow/testEmailTemplate.html', context=htmlContext)
+def dnowEmailAllTest(user, startingContext, debug=True):
+    for hh in startingContext['objects']:
+        hhData = HostHomeData(hh, user=user, dest='email')
+        template = startingContext['template']
+        htmlContext = hhData.getHtmlContext()
+        htmlContext = filterTheContext(htmlContext, template)
+        textContext = hhData.getTextContext()
+        textContext = filterTheContext(textContext, template)
+        htmlContext['hostHome'] = textContext['hostHome'] = hh
+        htmlContext['template'] = textContext['template'] = template
+        htmlContext['curObject'] = textContext['curObject'] = hh
+        htmlContext['curEmail'] = textContext['curEmail'] = getEmailForObject(hh)
+        dnowEmailTest(user, htmlContext, textContext, debug=debug)
+
+def dnowEmailTest(user, htmlContext, textContext, debug=True):
+    # print('sending test email', user.profile.churchEmailAddress)
+    msgPlain = render_to_string('dnow/baseEmailTemplate.txt', context=textContext)
+    msgHtml = render_to_string('dnow/baseEmailTemplate.html', context=htmlContext)
     hh = htmlContext['hostHome']
-    staffList = Leader.objects.filter(user=user).order_by('lastName').filter(churchStaff=True)
-    staffEmails = [ leader.email for leader in staffList ]
-    leaderEmails = [ leader.email for leader in hh.leader_set.all() ]
-    toList = [ hh.email ] + leaderEmails + staffEmails
-    subject = 'DNOW Weekend: Host Home Info - %s ' % (hh.lastName)
-    # print('  To: ' + ', '.join(toList))
-    # print('  ' + subject + '\n\n')
-    # print(msgPlain)
-    msgPlain = "plain message"
-    toList = ['dndmay2@gmail.com']
+    curObj = htmlContext['curObject']
+    curEmail = htmlContext['curEmail']
+    print('emailing %s' % curEmail)
+    template = htmlContext['template']
+    # staffList = Leader.objects.filter(user=user).order_by('lastName').filter(churchStaff=True)
+    # staffEmails = [ leader.email for leader in staffList ]
+    # leaderEmails = [ leader.email for leader in hh.leader_set.all() ]
+    # toList = [ hh.email ] + leaderEmails + staffEmails
+    if debug:
+        toList = ['dndmay2@gmail.com']
+    else:
+        toList = [ hh.email ]
+    subject = '%s - %s ' % (template.subject, curObj.lastName)
+    print('  To: ' + ', '.join(toList))
+    print('  ' + subject + '\n\n')
+    print(msgPlain)
     connection = get_connection()
     connection.username = user.profile.churchEmailAddress
     connection.password = user.profile.churchEmailPassword
     msg = EmailMultiAlternatives(subject, msgPlain, user.profile.churchEmailAddress, toList, connection=connection)
     msg.attach_alternative(msgHtml, "text/html")
-    msg.send()
+    # msg.send()
 
     # hh = HostHome.objects.filter(user=user).get(lastName='May')
     # emailHostHome(hh, user, debug=debug)
@@ -137,17 +159,8 @@ def emailDriver(driver, debug=False):
         connection.password = os.environ.get('GMP')
         msg = EmailMultiAlternatives(subject, msgPlain, 'dmay@chaseoaks.org', toList, connection=connection, reply_to=['dnow@chaseoaks.org'])
         msg.attach_alternative(msgHtml, "text/html")
-        msg.attach_file('dnow/static/dnow/files/DNOWSchedule2018.docx')
+        msg.attach_file('dnow/static/dnow/files/DNOWSchedule2019.docx')
         msg.send()
-        # send_mail(
-        #     subject,
-        #     msgPlain,
-        #     'dmay@chaseoaks.org',
-        #     toList,
-        #     html_message=msgHtml,
-        #     auth_user='dmay@chaseoaks.org',
-        #     auth_password=os.environ.get('GMP'),
-        # )
 
 
 def emailAllDrivers(user, debug=True):
@@ -202,17 +215,8 @@ def emailCook(cook, debug=False):
         connection.password = os.environ.get('GMP')
         msg = EmailMultiAlternatives(subject, msgPlain, 'dmay@chaseoaks.org', toList, connection=connection, reply_to=['dnow@chaseoaks.org'])
         msg.attach_alternative(msgHtml, "text/html")
-        msg.attach_file('dnow/static/dnow/files/DNOWSchedule2018.docx')
+        msg.attach_file('dnow/static/dnow/files/DNOWSchedule2019.docx')
         msg.send()
-        # send_mail(
-        #     subject,
-        #     msgPlain,
-        #     'dmay@chaseoaks.org',
-        #     toList,
-        #     html_message=msgHtml,
-        #     auth_user='dmay@chaseoaks.org',
-        #     auth_password=os.environ.get('GMP'),
-        # )
 
 
 def emailAllCooks(user, debug=True):
@@ -261,10 +265,9 @@ def emailParent(student, debug=False):
         # connection.password = ''
         msg = EmailMultiAlternatives(subject, msgPlain, 'dmay@chaseoaks.org', toList, connection=connection, reply_to=['dnow@chaseoaks.org'])
         msg.attach_alternative(msgHtml, "text/html")
-        msg.attach_file('dnow/static/dnow/files/DNOWSchedule2018.docx')
+        msg.attach_file('dnow/static/dnow/files/DNOWSchedule2019.docx')
         if not student.medicalForm:
-            msg.attach_file('dnow/static/dnow/files/66763.pdf')
-            msg.attach_file('dnow/static/dnow/files/66764.pdf')
+            msg.attach_file('dnow/static/dnow/files/DNOWWaiver2019.doc')
         msg.send()
 
 

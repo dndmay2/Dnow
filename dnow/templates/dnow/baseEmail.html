@@ -1,34 +1,35 @@
-{{ template.greeting|safe }}<br>
+{{ htmlGreeting|safe }}<br>
 <br>
 {% if hhBaseHtml %}
-    <h5>Host Home:</h5>
+    <h3>Host Home:</h3>
     {{ hhBaseHtml|safe }}
 {% endif %}
 {% if cooksHtml %}
-    <h5>Cooks:</h5>
+    <h3>Cooks:</h3>
     {{ cooksHtml|safe }}
 {% endif %}
 {% if leaderHtml %}
-    <h5>Leaders:</h5>
+    <h3>Leaders:</h3>
     {{ leaderHtml|safe }}
 {% endif %}
 {% if driverHtml %}
-    <h5>Drivers:</h5>
+    <h3>Drivers:</h3>
     {{ driverHtml|safe }}
 {% endif %}
 {% if tshirtHtml %}
-    <h5>T-Shirts:</h5>
+    <h3>T-Shirts:</h3>
     {{ tshirtHtml|safe }}
 {% endif %}
 {% if studentHtml %}
-    <h5>Students:</h5>
-    <h5>Total # students = {{ studentCount|safe }}</h5>
+    <h3>Students:</h3>
+    <h3>Total # students = {{ studentCount|safe }}</h3>
     {{ studentHtml|safe }}
 {% endif %}
 {% if churchStaffHtml %}
-    <h5>Church Staff:</h5>
+    <h3>Church Staff:</h3>
+    If you have any questions, please feel free to reach out to the church staff:
     {{ churchStaffHtml|safe }}
 {% endif %}
 <br>
-    {{ template.closing }}<br>
+    {{ htmlClosing|safe }}<br>
 <br>

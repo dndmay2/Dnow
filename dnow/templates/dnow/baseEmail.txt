@@ -1,0 +1,31 @@
+{{ template.greeting|safe }}
+{% if hhBaseHtml %}
+{{ hhBaseHtml|safe }}
+{% endif %}
+{% if cooksHtml %}
+Cooks:
+{{ cooksHtml|safe }}
+{% endif %}
+{% if leaderHtml %}
+Leaders:
+{{ leaderHtml|safe }}
+{% endif %}
+{% if driverHtml %}
+Drivers:
+{{ driverHtml|safe }}
+{% endif %}
+{% if tshirtHtml %}
+T-Shirts:
+{{ tshirtHtml|safe }}
+{% endif %}
+{% if studentHtml %}
+Students:
+Total # students = {{ studentCount|safe }}
+{{ studentHtml|safe }}
+{% endif %}
+{% if churchStaffHtml %}
+Church Staff:
+If you have any questions, please feel free to reach out to the church staff.
+{{ churchStaffHtml|safe }}
+{% endif %}
+{{ template.closing|safe }}

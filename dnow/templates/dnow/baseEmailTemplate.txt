@@ -1,0 +1,7 @@
+{% if isCook %}
+{% include "dnow/baseCookEmail.txt" %}
+{% elif isDriver %}
+{% include "dnow/baseDriverEmail.txt" %}
+{% else %}
+{% include "dnow/baseEmail.txt" %}
+{% endif %}

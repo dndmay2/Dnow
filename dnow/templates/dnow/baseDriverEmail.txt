@@ -1,0 +1,23 @@
+Dear {{ driver.firstName }},
+For some of you, your driving information has changed slightly. Please review below.
+
+Check-in is in the gym at Cottonwood Creek. Drivers (who are not leaders) please arrive by 8:45PM.
+You will be given further instruction at that time.
+
+You guys are awesome! Thank you for giving up a large part of your weekend to allow this event to be successful.
+
+You will be driving at the following times and locations:
+Drive Times
+{{ driveSlots|safe }}
+
+{{ hostHomeHtml|safe }}
+
+Some drive times will have you traveling to Cottonwood Creek.
+    Cottonwood Creek Church
+    1015 Sam Rayburn Tollway, Allen, TX 75013
+
+If you have any questions or concerns, you can contact:
+{{ churchStaffHtml|safe }}
+
+Thank you for all you do.
+The DNOW team

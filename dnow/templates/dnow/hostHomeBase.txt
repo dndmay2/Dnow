@@ -8,5 +8,7 @@ Email: {{ hostHome.email }}
 Grade(s):  {{ hostHome.grade }}
 Gender:  {{ hostHome.gender }}
 {% if not driver %}
+Background Check? {{ hostHome.bgCheck|yesno:"yes,no" }}
 T Shirts:  {{ hostHome.tshirtSize }}
+Allergies: {{ hostHome.allergy }}
 {% endif %}

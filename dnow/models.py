@@ -16,6 +16,7 @@ GRADE_CHOICES = (
 )
 
 SHIRT_SIZES = (
+    ('XS',      'XS'),
     ('Small',   'S'),
     ('Med',     'M'),
     ('Large',   'L'),
@@ -35,7 +36,6 @@ DRIVE_SLOTS = (
     ('driveSlot7', '7 Sat, 8:45 pm @CCC to Host'),
     ('driveSlot8', '8 Sun, 8:00 am @ Host to Sloan Creek'),
 )
-
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -185,15 +185,17 @@ class EmailTemplate(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=100)
+    subject = models.CharField(max_length=200, default='')
     greeting = models.TextField(blank=True)
     closing = models.TextField(blank=True)
     TO_GROUPS = (
         ('hostHomes', 'Host Homes'),
         ('parents', 'Parents'),
-        ('drivers', 'Drivers'),
         ('leaders', 'Leaders'),
+        ('drivers', 'Drivers (Include sections is ignored)'),
+        ('cooks', 'Cooks (Include sections is ignored)'),
     )
-    toGroups = MultiSelectField(choices=TO_GROUPS, default=None)
+    toGroups = models.CharField(choices=TO_GROUPS, default=None, max_length=50)
     EMAIL_DATA = (
         ('hostHomeBasics', 'Host Home Basics'),
         ('churchStaff', 'Church Staff'),

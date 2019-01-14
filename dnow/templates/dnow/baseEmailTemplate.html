@@ -15,6 +15,11 @@
 
 </head>
 <body>
-<b>To:</b> {{ template.toGroups }}<br><br>
-{% include "dnow/baseEmail.html" %}
+{% if isCook %}
+    {% include "dnow/baseCookEmail.html" %}
+{% elif isDriver %}
+    {% include "dnow/baseDriverEmail.html" %}
+{% else %}
+    {% include "dnow/baseEmail.html" %}
+{% endif %}
 </body>

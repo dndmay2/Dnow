@@ -1,0 +1,24 @@
+<p>Dear {{ curObject.firstName }},</p>
+{{ htmlGreeting|safe }}<br>
+<br>
+
+You will be driving at the following times and locations:
+<h3>Drive Times</h3>
+{{ driveSlots|safe }}
+{{ hostHomeHtml|safe }}
+
+Some drive times will have you traveling to Cottonwood Creek.
+<p> <a href="https://maps.google.com/?q=1015 Sam Rayburn Tollway+Allen+TX+75013">
+    Cottonwood Creek Church<br>
+    1015 Sam Rayburn Tollway, Allen, TX 75013
+</a>
+</p>
+
+{% if churchStaffHtml %}
+    <h3>Church Staff:</h3>
+    If you have any questions, please feel free to reach out to the church staff:
+    {{ churchStaffHtml|safe }}
+{% endif %}
+<br>
+    {{ htmlClosing|safe }}<br>
+<br>
