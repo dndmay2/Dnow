@@ -53,8 +53,8 @@ def dnowEmailTest(user, htmlContext, textContext, debug=True):
     msg = EmailMultiAlternatives(subject, msgPlain, user.profile.churchEmailAddress, toList, connection=connection)
     msg.attach_alternative(msgHtml, "text/html")
     msg.attach_file('dnow/static/dnow/files/DNOWSchedule2019.docx')
-    if htmlContext['sendWaiver']:
-        msg.attach_file('dnow/static/dnow/files/DNOWWaiver2019.doc')
+    # if htmlContext['sendWaiver']:
+    #     msg.attach_file('dnow/static/dnow/files/DNOWWaiver2019.doc')
     msg.send()
 
     # hh = HostHome.objects.filter(user=user).get(lastName='May')
