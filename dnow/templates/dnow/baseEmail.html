@@ -1,3 +1,4 @@
+<p>Dear {{ personName }},</p>
 {{ htmlGreeting|safe }}<br>
 <br>
 {% if hhBaseHtml %}
@@ -33,3 +34,6 @@
 <br>
     {{ htmlClosing|safe }}<br>
 <br>
+{% if schedule %}
+    ATTACHED: DNOW Schedule<br>
+{% endif %}

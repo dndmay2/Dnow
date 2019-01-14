@@ -36,9 +36,13 @@ def dnowEmailTest(user, htmlContext, textContext, debug=True):
     # leaderEmails = [ leader.email for leader in hh.leader_set.all() ]
     # toList = [ hh.email ] + leaderEmails + staffEmails
     if debug:
-        toList = ['dndmay2@gmail.com']
+        print('user is', user.username)
+        if user.username == 'admin':
+            toList = ['dndmay2@gmail.com']
+        else:
+            toList = [user.profile.churchEmailAddress, 'dndmay2@gmail.com']
     else:
-        toList = [ hh.email ]
+        toList = [ curEmail ]
     subject = '%s - %s ' % (template.subject, curObj.lastName)
     print('  To: ' + ', '.join(toList))
     print('  ' + subject + '\n\n')
@@ -48,7 +52,10 @@ def dnowEmailTest(user, htmlContext, textContext, debug=True):
     connection.password = user.profile.churchEmailPassword
     msg = EmailMultiAlternatives(subject, msgPlain, user.profile.churchEmailAddress, toList, connection=connection)
     msg.attach_alternative(msgHtml, "text/html")
-    # msg.send()
+    msg.attach_file('dnow/static/dnow/files/DNOWSchedule2019.docx')
+    if htmlContext['sendWaiver']:
+        msg.attach_file('dnow/static/dnow/files/DNOWWaiver2019.doc')
+    msg.send()
 
     # hh = HostHome.objects.filter(user=user).get(lastName='May')
     # emailHostHome(hh, user, debug=debug)

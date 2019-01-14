@@ -1,3 +1,4 @@
+Dear {{ personName }},
 {{ template.greeting|safe }}
 {% if hhBaseHtml %}
 {{ hhBaseHtml|safe }}

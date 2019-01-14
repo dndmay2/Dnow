@@ -16,3 +16,6 @@ Meal: <b>{{ meal.time }}</b>
 <br>
     {{ htmlClosing|safe }}<br>
 <br>
+{% if schedule %}
+    ATTACHED: DNOW Schedule<br>
+{% endif %}

@@ -19,6 +19,10 @@ def filterTheContext(context, template):
         context['studentHtml'] = None
     if 'tshirts' not in template.includeData:
         context['tshirtHtml'] = None
+    if 'schedule' not in template.includeData:
+        context['schedule'] = None
+    else:
+        context['schedule'] = True
     return context
 
 def getCurrentObject(template, request):
@@ -55,6 +59,24 @@ def getEmailForObject(object):
         return object.parentEmail
     else:
         return object.email
+
+def checkIfWaiverNeeded(object):
+    if object.__class__.__name__ == 'Student':
+        if not object.medicalForm:
+            return True
+    else:
+        return False
+
+def getPersonName(object):
+    if object.__class__.__name__ == 'HostHome':
+        return '%s family' % object.lastName
+    elif object.__class__.__name__ == 'Student':
+        return 'parent of %s %s' % (object.firstName, object.lastName)
+    elif object.__class__.__name__ == 'Leader':
+        return '%s %s' % (object.firstName, object.lastName)
+    else:
+        return 'family'
+
 
 def getHostHomeFromHostHomeDropdown(request):
     sendAll = False

@@ -281,28 +281,36 @@ def emailTemplateView(request, template_id):
     form = objects = hhData = None
     curObject, hhData, form, sendAll, objects = getCurrentObject(template, request)
     hh = getHostHomeFromObject(curObject)
+    context = {}
     if hhData:
         context = hhData.getHtmlContext()
         context = filterTheContext(context, template)
         textContext = hhData.getTextContext()
         textContext = filterTheContext(textContext, template)
         context['isCook'] = context['isDriver'] = False
+        context['personName'] = getPersonName(curObject)
     else:
         if template.toGroups == 'cooks':
             context, textContext = getCookContext(request.user, curObject)
         elif template.toGroups == 'drivers':
             context, textContext = getDriverContext(request.user, curObject)
+        if 'schedule' not in template.includeData:
+            context['schedule'] = None
+        else:
+            context['schedule'] = True
 
     context['template'] = textContext['template'] = template
     context['hostHome'] = textContext['hostHome'] = hh
     context['curObject'] = textContext['curObject'] = curObject
     context['curEmail'] = textContext['curEmail'] = getEmailForObject(curObject)
+    context['sendWaiver'] = checkIfWaiverNeeded(curObject)
     context['objects'] = objects
     context['form'] = form
     context['logMessage'] = ''
     context['htmlGreeting'] = template.greeting.replace('\n', '<br>')
     context['htmlClosing'] = template.closing.replace('\n', '<br>')
     context['sendAll'] = sendAll
+
     sendEmail = debug = False
     debugMsg = ''
     if request.GET.get('sendTestEmail'):

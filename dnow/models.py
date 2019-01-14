@@ -204,6 +204,7 @@ class EmailTemplate(models.Model):
         ('leaders', 'Leaders'),
         ('students', 'Students'),
         ('tshirts', 'T-Shirts'),
+        ('schedule', 'Schedule'),
     )
     includeData = MultiSelectField(choices=EMAIL_DATA, default=None)
     # toGroups = models.ManyToManyField(EmailToGroups, default=0)
