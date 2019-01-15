@@ -273,7 +273,8 @@ def generateOverallSummaryHtml(user):
         html += '<td>%d</td>' % numStudents
         html += '<td>%d</td>' % numLeaders
         slot = 1
-        for ds in hh.driveslot_set.all().order_by('time'):
+        driveSlots = hh.driveslot_set.all().order_by('time')
+        for ds in driveSlots:
             if hh.grade == '?':
                 html += '<td></td>'
             else:
@@ -283,8 +284,8 @@ def generateOverallSummaryHtml(user):
                 else:
                     totNumSeats = 0
                 # Student leaders have to be passengers
-                # However, they should be able to drive Friday night and Sunday morning
-                if slot == 1 or slot == 6:
+                # However, they should be able to drive Sunday morning
+                if slot == len(driveSlots):
                     numPassengers = numStudents
                 else:
                     numPassengers = numStudents + numPassengerLeaders
