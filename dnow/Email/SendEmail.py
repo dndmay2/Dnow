@@ -5,22 +5,52 @@ from django.core.mail import EmailMultiAlternatives, get_connection
 
 from dnow.htmlGenerators import *
 from dnow.models import *
-from dnow.Email.EmailTemplateSupport import filterTheContext, getEmailForObject
+from dnow.Email.EmailTemplateSupport import filterTheContext, getEmailForObject, getDriverContext, getCookContext, \
+    getPersonName, getHostHomeFromObject
 
 
 def dnowEmailAllTest(user, startingContext, debug=True):
-    for hh in startingContext['objects']:
-        hhData = HostHomeData(hh, user=user, dest='email')
+    results = ''
+    for object in startingContext['objects']:
         template = startingContext['template']
-        htmlContext = hhData.getHtmlContext()
-        htmlContext = filterTheContext(htmlContext, template)
-        textContext = hhData.getTextContext()
-        textContext = filterTheContext(textContext, template)
-        htmlContext['hostHome'] = textContext['hostHome'] = hh
-        htmlContext['template'] = textContext['template'] = template
-        htmlContext['curObject'] = textContext['curObject'] = hh
-        htmlContext['curEmail'] = textContext['curEmail'] = getEmailForObject(hh)
-        dnowEmailTest(user, htmlContext, textContext, debug=debug)
+        hh = getHostHomeFromObject(object)
+        if hh:
+            print('object.lastName', object.lastName)
+            if template.toGroups == 'hostHomes' or template.toGroups == 'leaders' or template.toGroups == 'parents':
+                hhData = HostHomeData(hh, user=user, dest='email')
+                htmlContext = hhData.getHtmlContext()
+                htmlContext = filterTheContext(htmlContext, template)
+                textContext = hhData.getTextContext()
+                textContext = filterTheContext(textContext, template)
+                htmlContext['isCook'] = htmlContext['isDriver'] = False
+                htmlContext['personName'] = getPersonName(object)
+            else:
+                if template.toGroups == 'cooks':
+                    htmlContext, textContext = getCookContext(user, object)
+                elif template.toGroups == 'drivers':
+                    htmlContext, textContext = getDriverContext(user, object)
+                if 'schedule' not in template.includeData:
+                    htmlContext['schedule'] = None
+                else:
+                    htmlContext['schedule'] = True
+            htmlContext['hostHome'] = textContext['hostHome'] = hh
+            htmlContext['template'] = textContext['template'] = template
+            htmlContext['curObject'] = textContext['curObject'] = object
+            htmlContext['curEmail'] = textContext['curEmail'] = getEmailForObject(object)
+            # htmlContext['sendWaiver'] = checkIfWaiverNeeded(curObject)
+            htmlContext['htmlGreeting'] = template.greeting.replace('\n', '<br>')
+            htmlContext['htmlClosing'] = template.closing.replace('\n', '<br>')
+            htmlContext['sendAll'] = True
+
+            if htmlContext['curEmail']:
+                res = dnowEmailTest(user, htmlContext, textContext, debug=debug)
+                results += res + '<br>'
+            else:
+                results += 'DID NOT FIND email for %s %s<br>' % (object.firstName, object.lastName)
+        else:
+            results += 'DID NOT FIND HostHome for %s %s<br>' % (object.firstName, object.lastName)
+    results += '<br><br>'
+    return(results)
 
 def dnowEmailTest(user, htmlContext, textContext, debug=True):
     # print('sending test email', user.profile.churchEmailAddress)
@@ -56,6 +86,8 @@ def dnowEmailTest(user, htmlContext, textContext, debug=True):
     # if htmlContext['sendWaiver']:
     #     msg.attach_file('dnow/static/dnow/files/DNOWWaiver2019.doc')
     msg.send()
+    res = 'Emailed %s' % curEmail
+    return res
 
     # hh = HostHome.objects.filter(user=user).get(lastName='May')
     # emailHostHome(hh, user, debug=debug)

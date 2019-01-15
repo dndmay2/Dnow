@@ -26,7 +26,9 @@
         </div>
         {{ logMessage }}
     </div>
-
+    {% if results %}
+        {{ results|safe }}
+    {% endif %}
     <b>To:</b> {{ template.toGroups }}<br>
     {% if sendAll %}
         All emails:

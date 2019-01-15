@@ -49,16 +49,22 @@ def getCurrentObject(template, request):
 def getHostHomeFromObject(object):
     if object.__class__.__name__ == 'HostHome':
         return object
-    elif object.__class__.__name__ == 'Student':
+    elif object.__class__.__name__ == 'Student' or object.__class__.__name__ == 'Leader':
         return object.hostHome
+    elif object.__class__.__name__ == 'Driver' or object.__class__.__name__ == 'Cook':
+        return True
     else:
         return None
 
 def getEmailForObject(object):
     if object.__class__.__name__ == 'Student':
-        return object.parentEmail
+        email = object.parentEmail
     else:
-        return object.email
+        email = object.email
+    if '@' in email:
+        return email
+    else:
+        return None
 
 def checkIfWaiverNeeded(object):
     if object.__class__.__name__ == 'Student':

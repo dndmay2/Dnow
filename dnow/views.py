@@ -322,10 +322,10 @@ def emailTemplateView(request, template_id):
     if sendEmail:
         if sendAll:
             context['logMessage'] = 'Sent all emails%s @ %s' % (debugMsg, time.strftime("%Y-%m-%d %H:%M"))
-            dnowEmailAllTest(user=request.user, startingContext=context, debug=debug)
+            context['results'] = dnowEmailAllTest(user=request.user, startingContext=context, debug=debug)
         else:
             context['logMessage'] = 'Sent one email%s @ %s' % (debugMsg, time.strftime("%Y-%m-%d %H:%M"))
-            dnowEmailTest(user=request.user, htmlContext=context, textContext=textContext, debug=debug)
+            context['results'] = dnowEmailTest(user=request.user, htmlContext=context, textContext=textContext, debug=debug)
         debug = False
     elif request.GET.get('sendRealEmail'):
         context['logMessage'] = 'Sent real email to list'
