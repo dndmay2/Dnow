@@ -232,7 +232,7 @@ def generateDriverDetailsTable(hostHome, dest='html'):
         else:
             numPassengers = numStudents + numPassengerLeaders
             cell += '%d students + %d leaders = %d%s' % (numStudents, numPassengerLeaders, numPassengers, newLine)
-        seatNeed = getSeatDiff(numPassengers, totalSeats, dest=dest)
+        seatNeed, short, extra = getSeatDiff(numPassengers, totalSeats, dest=dest)
         cell += 'Seat need = %s%s' % (seatNeed, newLine)
         slot += 1
         row.append(cell)
@@ -255,6 +255,8 @@ def generateOverallSummaryHtml(user):
     html += '</tr>'
     totStudents = totLeaders = 0
     seats = defaultdict(lambda: 0)
+    extrad = defaultdict(lambda: 0)
+    shortd = defaultdict(lambda: 0)
     # need = defaultdict(lambda: 0)
     tshirtCounts = defaultdict(lambda: 0)
     for hh in hostHomesList:
@@ -289,9 +291,11 @@ def generateOverallSummaryHtml(user):
                     numPassengers = numStudents
                 else:
                     numPassengers = numStudents + numPassengerLeaders
-                seatNeed = getSeatDiff(numPassengers, totNumSeats)
+                seatNeed, short, extra = getSeatDiff(numPassengers, totNumSeats)
                 html += '<td>%d seats, %s</td>' % (totNumSeats, seatNeed)
                 seats[ds.time] += totNumSeats
+                shortd[ds.time] += short
+                extrad[ds.time] += extra
             slot += 1
         html += '</tr>'
         tshirtCounts = countShirts(tshirtCounts, hh)
@@ -303,7 +307,7 @@ def generateOverallSummaryHtml(user):
     html += '<td>%d</td>' % totStudents
     html += '<td>%d</td>' % totLeaders
     for ds in DRIVE_SLOTS:
-        html += '<td>%d seats</td>' % seats[ds[1]]
+        html += '<td>%d seats<br><span style="color:red">%d short</span><br><span style="color:green">%d extra</span></td>' % (seats[ds[1]], shortd[ds[1]], extrad[ds[1]])
     html += '</table>'
     html += '<h2>T Shirt Counts</h2>'
     html += generateShirtSizesSummaryHtml(tshirtCounts)
@@ -313,6 +317,7 @@ def generateOverallSummaryHtml(user):
 
 def getSeatDiff(numStudents, totalSeats, dest='html'):
     seatDiff = totalSeats - numStudents
+    short = extra = 0
     if seatDiff == '0':
         seatNeed = 'none'
     elif seatDiff < 0:
@@ -320,12 +325,14 @@ def getSeatDiff(numStudents, totalSeats, dest='html'):
             seatNeed = '<span style="color:red">%d short</span>' % abs(seatDiff)
         else:
             seatNeed = '%d short' % abs(seatDiff)
+        short = abs(seatDiff)
     else:
         if dest == 'html' or dest == 'email':
             seatNeed = '<span style="color:green">%d extra</span>' % seatDiff
         else:
             seatNeed = '%d extra' % seatDiff
-    return seatNeed
+        extra = seatDiff
+    return seatNeed, short, extra
 
 
 def countShirts(tsc, hostHome):

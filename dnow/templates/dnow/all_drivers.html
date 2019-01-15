@@ -6,11 +6,31 @@
 <h1>Drivers</h1>
 {% if driversList %}
     <p><b>Total Car Capacity:</b> {{ seatCount }}</p>
-    <ul>
-    {% for driver in driversList %}
-        <li><a href="{% url 'driver' driver.id %}">{{ driver.firstName }} {{driver.lastName}}</a> {{ driver.phone}} {{driver.email }}</li>
-    {% endfor %}
-    </ul>
+{#    <ul>#}
+{#    {% for driver in driversList %}#}
+{#        <li><a href="{% url 'driver' driver.id %}">{{ driver.firstName }} {{driver.lastName}}</a> {{ driver.phone}} {{driver.email }}</li>#}
+{#    {% endfor %}#}
+{#    </ul>#}
+    <table summary="Leader Table">
+        <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Capacity</th>
+            <th>Background?</th>
+            <th>T-Shirt</th>
+        </tr>
+        {% for driver in driversList %}
+            <tr>
+                <td><a href="{% url 'driver' driver.id %}">{{ driver.firstName }} {{driver.lastName}}</a></td>
+                <td>{{ driver.phone }}</td>
+                <td><a href="mailto:{{ driver.email }}">{{ driver.email }}</a></td>
+                <td>{{ driver.carCapacity }}</td>
+                <td>{{ driver.bgCheck|yesno:"yes,no" }}</td>
+                <td>{{ driver.tshirtSize }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 {% else %}
     <p>No drivers in db.</p>
 {% endif %}
