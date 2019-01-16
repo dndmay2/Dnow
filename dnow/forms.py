@@ -12,7 +12,7 @@ class SettingForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ('googleSpreadSheet', 'churchEmailAddress', 'churchName', 'churchEmailPassword')
+        fields = ('googleSpreadSheet', 'churchEmailAddress', 'churchName', 'churchEmailPassword', 'mealColumns', 'driveTimeColumns')
 
     def __init__(self, *args, **kwargs):
         super(SettingForm, self).__init__(*args, **kwargs)

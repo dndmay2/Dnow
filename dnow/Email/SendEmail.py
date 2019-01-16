@@ -82,7 +82,7 @@ def dnowEmailTest(user, htmlContext, textContext, debug=True):
     connection.password = user.profile.churchEmailPassword
     msg = EmailMultiAlternatives(subject, msgPlain, user.profile.churchEmailAddress, toList, connection=connection)
     msg.attach_alternative(msgHtml, "text/html")
-    msg.attach_file('dnow/static/dnow/files/DNOWSchedule2019.docx')
+    msg.attach_file('dnow/static/dnow/files/SC_DNOWSchedule2019.docx')
     # if htmlContext['sendWaiver']:
     #     msg.attach_file('dnow/static/dnow/files/DNOWWaiver2019.doc')
     msg.send()
@@ -198,7 +198,7 @@ def emailDriver(driver, debug=False):
         connection.password = os.environ.get('GMP')
         msg = EmailMultiAlternatives(subject, msgPlain, 'dmay@chaseoaks.org', toList, connection=connection, reply_to=['dnow@chaseoaks.org'])
         msg.attach_alternative(msgHtml, "text/html")
-        msg.attach_file('dnow/static/dnow/files/DNOWSchedule2019.docx')
+        msg.attach_file('dnow/static/dnow/files/SC_DNOWSchedule2019.docx')
         msg.send()
 
 
@@ -254,7 +254,7 @@ def emailCook(cook, debug=False):
         connection.password = os.environ.get('GMP')
         msg = EmailMultiAlternatives(subject, msgPlain, 'dmay@chaseoaks.org', toList, connection=connection, reply_to=['dnow@chaseoaks.org'])
         msg.attach_alternative(msgHtml, "text/html")
-        msg.attach_file('dnow/static/dnow/files/DNOWSchedule2019.docx')
+        msg.attach_file('dnow/static/dnow/files/SC_DNOWSchedule2019.docx')
         msg.send()
 
 
@@ -304,7 +304,7 @@ def emailParent(student, debug=False):
         # connection.password = ''
         msg = EmailMultiAlternatives(subject, msgPlain, 'dmay@chaseoaks.org', toList, connection=connection, reply_to=['dnow@chaseoaks.org'])
         msg.attach_alternative(msgHtml, "text/html")
-        msg.attach_file('dnow/static/dnow/files/DNOWSchedule2019.docx')
+        msg.attach_file('dnow/static/dnow/files/SC_DNOWSchedule2019.docx')
         if not student.medicalForm:
             msg.attach_file('dnow/static/dnow/files/DNOWWaiver2019.doc')
         msg.send()

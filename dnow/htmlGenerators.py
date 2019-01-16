@@ -7,7 +7,7 @@ from tabulate import tabulate
 
 from dnow.models import *
 from collections import defaultdict
-from dnow.Spreadsheet.ReadSpreadsheet import checkStudentFriendMatchups
+from dnow.Spreadsheet.ReadSpreadsheet import checkStudentFriendMatchups, getDriveTimeColumnsTuple
 
 import re
 
@@ -249,7 +249,8 @@ def generateOverallSummaryHtml(user):
     html += '<th>Gender</th>'
     html += '<th># Students</th>'
     html += '<th># Leaders</th>'
-    for ds in DRIVE_SLOTS:
+    driveTimeColumns = getDriveTimeColumnsTuple(user)
+    for ds in driveTimeColumns:
         time = ds[1][2:]
         html += '<th>%s</th>' % time
     html += '</tr>'
@@ -306,7 +307,7 @@ def generateOverallSummaryHtml(user):
     html += '<td></td>'
     html += '<td>%d</td>' % totStudents
     html += '<td>%d</td>' % totLeaders
-    for ds in DRIVE_SLOTS:
+    for ds in driveTimeColumns:
         html += '<td>%d seats<br><span style="color:red">%d short</span><br><span style="color:green">%d extra</span></td>' % (seats[ds[1]], shortd[ds[1]], extrad[ds[1]])
     html += '</table>'
     html += '<h2>T Shirt Counts</h2>'

@@ -43,6 +43,8 @@ class Profile(models.Model):
     churchName = models.CharField(max_length=30, blank=True)
     churchEmailAddress = models.CharField(max_length=30, blank=True)
     churchEmailPassword = models.CharField(max_length=30, blank=True)
+    mealColumns = models.TextField(max_length=500, blank=True)
+    driveTimeColumns = models.TextField(max_length=1000, blank=True)
 
 
 # Create your models here.

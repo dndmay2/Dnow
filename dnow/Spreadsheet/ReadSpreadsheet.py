@@ -236,6 +236,18 @@ def checkStudentFriendMatchups(user):
     return friendDict
 
 
+def getDriveTimeColumnsTuple(user):
+    columns = user.profile.driveTimeColumns.split('\n')
+    columns = [x.strip() for x in columns]
+    i=1
+    driveTimeColumns = []
+    for col in columns:
+        name = 'driveSlot%d' % i
+        i+=1
+        driveTimeColumns.append((name, col))
+    return driveTimeColumns
+
+
 class ReadSpreadsheet:
     def __init__(self, user):
         """Shows basic usage of the Sheets API.
@@ -246,6 +258,11 @@ class ReadSpreadsheet:
         """
         dnow.config.SPREADSHEET_LOG = ''
         self.user = user
+        self.mealColumns = user.profile.mealColumns.split('\n')
+        self.mealColumns = [x.strip() for x in self.mealColumns]
+        print(self.mealColumns)
+        self.driveTimeColumns = getDriveTimeColumnsTuple(user)
+        print(self.driveTimeColumns)
         self.spreadsheetId = None
         self.parseSpreadSheetUrl()
 
@@ -445,7 +462,7 @@ class ReadSpreadsheet:
         except Exception as e:
             printLog('Error with hosthome row: %s %s' % (row, e))
         if hh:
-            for ds in DRIVE_SLOTS:
+            for ds in self.driveTimeColumns:
                 driveSlot = DriveSlot(hostHome=hh, time=ds[1])
                 driveSlot.user = self.user
                 driveSlot.save()
@@ -478,24 +495,24 @@ class ReadSpreadsheet:
                 c = Cook(firstName=cookFirstName, lastName=cookLastName)
                 c.phone = readCell(row, col=COOK_COLUMNS['Cell'] )
                 c.email = readCell(row, col=COOK_COLUMNS['Email'] )
-                meal1 = readCell(row, col=COOK_COLUMNS[MEAL1] )
+                meal1 = readCell(row, col=COOK_COLUMNS[self.mealColumns[0]] )
                 hhObj1 = hhObj2 = False
                 c.user = self.user
                 c.save()
                 if meal1 != '' and meal1 != 'NA':
                     try:
                         hhObj1 = HostHome.objects.filter(user=self.user).get(lastName=meal1)
-                        m = Meal(cook=c, time=MEAL1, hostHome=hhObj1)
+                        m = Meal(cook=c, time=self.mealColumns[0], hostHome=hhObj1)
                         m.user = self.user
                         m.save()
                         printLog("Meal = %s" % m)
                     except Exception as e:
                         printLog('No host home for %s %s meal1: .%s. (%s)' % (cookFirstName, cookLastName, meal1, e))
-                meal2 = readCell(row, col=COOK_COLUMNS[MEAL2] )
+                meal2 = readCell(row, col=COOK_COLUMNS[self.mealColumns[1]] )
                 if meal2 != '' and meal2 != 'NA':
                     try:
                         hhObj2 = HostHome.objects.filter(user=self.user).get(lastName=meal2)
-                        m = Meal(cook=c, time=MEAL2, hostHome=hhObj2)
+                        m = Meal(cook=c, time=self.mealColumns[0], hostHome=hhObj2)
                         m.user = self.user
                         m.save()
                         printLog("Meal = %s" % m)
@@ -587,7 +604,7 @@ class ReadSpreadsheet:
                 d.bgCheck = getBoolean(readCell(row, col=DRIVER_COLUMNS['Background Check?']))
                 d.user = self.user
                 d.save()
-                for ds in DRIVE_SLOTS:
+                for ds in self.driveTimeColumns:
                     time = ds[1]
                     hostHome = readCell(row, col=DRIVER_COLUMNS[time])
                     try:
