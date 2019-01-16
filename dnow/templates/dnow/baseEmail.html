@@ -35,5 +35,8 @@
     {{ htmlClosing|safe }}<br>
 <br>
 {% if schedule %}
-    ATTACHED: DNOW Schedule<br>
+    ATTACHED: {{ scheduleFileName }}<br>
+{% endif %}
+{% if sendWaiver %}
+    ATTACHED: DNOWWaiver2019.doc<br>
 {% endif %}

@@ -310,6 +310,7 @@ def emailTemplateView(request, template_id):
     context['htmlGreeting'] = template.greeting.replace('\n', '<br>')
     context['htmlClosing'] = template.closing.replace('\n', '<br>')
     context['sendAll'] = sendAll
+    context['scheduleFileName'] = request.user.profile.scheduleFileName
 
     sendEmail = debug = False
     debugMsg = ''

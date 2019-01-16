@@ -2,6 +2,8 @@ from __future__ import print_function
 # import httplib2
 import os
 import sys
+from os.path import join
+
 from apiclient import discovery
 # import json
 import simplejson
@@ -142,7 +144,7 @@ def getShirtSize(size):
 
 def getBoolean(val):
     val = val.lower()
-    if val in ['y', 'yes', 'true', 'ok', 'x']:
+    if val in ['y', 'yes', 'true', 'ok', 'x', 'done']:
         return True
     else:
         return False
@@ -264,6 +266,9 @@ class ReadSpreadsheet:
         self.driveTimeColumns = getDriveTimeColumnsTuple(user)
         print(self.driveTimeColumns)
         self.spreadsheetId = None
+        mypath = 'dnow/static/dnow/files/'
+        allfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
+        print(allfiles)
         self.parseSpreadSheetUrl()
 
         # OLD
@@ -512,7 +517,7 @@ class ReadSpreadsheet:
                 if meal2 != '' and meal2 != 'NA':
                     try:
                         hhObj2 = HostHome.objects.filter(user=self.user).get(lastName=meal2)
-                        m = Meal(cook=c, time=self.mealColumns[0], hostHome=hhObj2)
+                        m = Meal(cook=c, time=self.mealColumns[1], hostHome=hhObj2)
                         m.user = self.user
                         m.save()
                         printLog("Meal = %s" % m)

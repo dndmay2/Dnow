@@ -6,7 +6,7 @@ from django.core.mail import EmailMultiAlternatives, get_connection
 from dnow.htmlGenerators import *
 from dnow.models import *
 from dnow.Email.EmailTemplateSupport import filterTheContext, getEmailForObject, getDriverContext, getCookContext, \
-    getPersonName, getHostHomeFromObject
+    getPersonName, getHostHomeFromObject, checkIfWaiverNeeded
 
 
 def dnowEmailAllTest(user, startingContext, debug=True):
@@ -37,7 +37,7 @@ def dnowEmailAllTest(user, startingContext, debug=True):
             htmlContext['template'] = textContext['template'] = template
             htmlContext['curObject'] = textContext['curObject'] = object
             htmlContext['curEmail'] = textContext['curEmail'] = getEmailForObject(object)
-            # htmlContext['sendWaiver'] = checkIfWaiverNeeded(curObject)
+            htmlContext['sendWaiver'] = checkIfWaiverNeeded(object)
             htmlContext['htmlGreeting'] = template.greeting.replace('\n', '<br>')
             htmlContext['htmlClosing'] = template.closing.replace('\n', '<br>')
             htmlContext['sendAll'] = True
@@ -82,9 +82,11 @@ def dnowEmailTest(user, htmlContext, textContext, debug=True):
     connection.password = user.profile.churchEmailPassword
     msg = EmailMultiAlternatives(subject, msgPlain, user.profile.churchEmailAddress, toList, connection=connection)
     msg.attach_alternative(msgHtml, "text/html")
-    msg.attach_file('dnow/static/dnow/files/SC_DNOWSchedule2019.docx')
-    # if htmlContext['sendWaiver']:
-    #     msg.attach_file('dnow/static/dnow/files/DNOWWaiver2019.doc')
+    schedule = 'dnow/static/dnow/files/' + user.profile.scheduleFileName
+    if os.path.isfile(schedule) and htmlContext['schedule']:
+        msg.attach_file(schedule)
+    if htmlContext['sendWaiver']:
+        msg.attach_file('dnow/static/dnow/files/DNOWWaiver2019.doc')
     msg.send()
     res = 'Emailed %s' % curEmail
     return res
