@@ -16,7 +16,7 @@ class SettingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(SettingForm, self).__init__(*args, **kwargs)
-        self.fields['churchEmailPassword'].widget = forms.PasswordInput()
+        self.fields['churchEmailPassword'].widget = forms.PasswordInput(render_value = True)
 
 # class EmailForm(forms.ModelForm):
 #
